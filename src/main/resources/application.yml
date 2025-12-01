@@ -1,5 +1,8 @@
+spring:
+  config:
+    import: optional:file:.env[.properties]
 okta:
   oauth2:
-    issuer: https://dev-edward-andress.uk.auth0.com/
-    client-id: ${OKTA_CLIENT_ID}
-    client-secret: ${OKTA_CLIENT_SECRET}
+    issuer: ${auth-issuer}
+    client-id: ${auth-client-id}
+    client-secret: ${auth-client-secret}
