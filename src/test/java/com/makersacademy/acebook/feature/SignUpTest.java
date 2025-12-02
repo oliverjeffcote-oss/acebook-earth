@@ -1,13 +1,8 @@
 package com.makersacademy.acebook.feature;
 
 import com.github.javafaker.Faker;
-//import org.junit.After;
-//import org.junit.Assert;
-//import org.junit.Before;
-//import org.junit.Test;
-import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.*;
-
+import org.flywaydb.core.Flyway;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
