@@ -36,11 +36,11 @@ public class User {
     private List<Comment> comments;
 
     // Friendships this user STARTED
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "requester")
     private List<Relationship> sentFriendRequests;
 
     // Friendships where this user is the TARGET (the friend)
-    @OneToMany(mappedBy = "friend")
+    @OneToMany(mappedBy = "receiver")
     private List<Relationship> receivedFriendRequests;
 
     public User() {
