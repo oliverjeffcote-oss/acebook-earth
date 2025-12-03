@@ -1,3 +1,3 @@
 ALTER TABLE posts
-ADD COLUMN user_id
+ADD COLUMN user_id INT
 NOT NULL;
