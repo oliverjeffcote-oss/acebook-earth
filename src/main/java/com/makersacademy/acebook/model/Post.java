@@ -3,18 +3,35 @@ package com.makersacademy.acebook.model;
 import jakarta.persistence.*;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
-@Entity
+@Entity @Getter
+@Setter @NoArgsConstructor
 @Table(name = "POSTS")
 public class Post {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "content")
     private String content;
 
-    public Post() {}
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @OneToMany(mappedBy = "post")
+    private List<Like> likes;
+
+    @OneToMany(mappedBy = "post")
+    private List<Comment> comment;
 
     public Post(String content) {
         this.content = content;
