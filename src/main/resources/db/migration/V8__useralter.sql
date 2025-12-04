@@ -1,0 +1,5 @@
+ALTER TABLE users
+ADD COLUMN auth0_id VARCHAR(255);
+
+ALTER TABLE users
+ADD CONSTRAINT uk_auth0_id UNIQUE (auth0_id);
