@@ -29,4 +29,8 @@ public class Relationship {
     private Status status;
 
 
+    public Relationship(User requester, User receiver) {
+        this.requester = requester;
+        this.receiver = receiver;
+    }
 }
