@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -33,7 +32,8 @@ public class Post {
     @OneToMany(mappedBy = "post")
     private List<Comment> comment;
 
-    public Post(String content) {
+    public Post(String content, User user) {
         this.content = content;
+        this.user = user;
     }
 }

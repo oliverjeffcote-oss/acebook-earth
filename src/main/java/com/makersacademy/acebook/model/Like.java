@@ -23,4 +23,8 @@ public class Like {
     private User user;
 
 
+    public Like(Post post, User user) {
+        this.post = post;
+        this.user = user;
+    }
 }
