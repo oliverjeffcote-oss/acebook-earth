@@ -1,7 +1,9 @@
 package com.makersacademy.acebook.controller;
 
 import com.makersacademy.acebook.model.Post;
+import com.makersacademy.acebook.model.User;
 import com.makersacademy.acebook.repository.PostRepository;
+import com.makersacademy.acebook.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,6 +18,9 @@ public class PostsController {
     @Autowired
     PostRepository repository;
 
+    @Autowired
+    UserRepository userRepository;
+
     @GetMapping("/posts")
     public String index(Model model) {
         Iterable<Post> posts = repository.findAll();
@@ -26,6 +31,9 @@ public class PostsController {
 
     @PostMapping("/posts")
     public RedirectView create(@ModelAttribute Post post) {
+        User user = userRepository.findById(1L)
+                        .orElseThrow(() -> new RuntimeException("Default user not found"));
+        post.setUser(user);
         repository.save(post);
         return new RedirectView("/posts");
     }
