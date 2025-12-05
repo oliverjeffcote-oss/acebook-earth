@@ -3,25 +3,86 @@
           xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5" >
     <head lang="en">
         <meta charset="UTF-8"/>
-        <title>Acebook</title>
+        <title>Acebook - Posts</title>
         <link rel="stylesheet" href="/main.css" />
     </head>
     <body>
 
-    <h1>Posts</h1>
+    <h1>Acebook - Posts</h1>
 
     <div sec:authorize="isAuthenticated()" id="greeting">
         Signed in as <span sec:authentication="principal.attributes['email']"></span>
     </div>
 
-    <form action="#" th:action="@{/posts}" th:object="${post}" method="post">
-        <p>Content: <input type="text" th:field="*{content}" /></p>
-        <p><input type="submit" value="Submit" /> <input type="reset" value="Reset" /></p>
-    </form>
+    <section>
+        <h2>Create a new post</h2>
+        <form th:action="@{/posts}" th:object="${post}" method="post">
+            <!-- CSRF token (needed if Spring Security is enabled) -->
+<!--            <input type="hidden"-->
+<!--                   th:if="${_csrf != null}"-->
+<!--                   th:name="${_csrf.parameterName}"-->
+<!--                   th:value="${_csrf.token}" />-->
 
-    <ul th:each="post: ${posts}">
-        <li th:text="${post.content}" />
-    </ul>
+            <div>
+                <label for="content">Content</label><br />
+                <textarea id="content"
+                          th:field="*{content}"
+                          rows="3"
+                          cols="50"
+                          placeholder="What's on your mind?"></textarea>
+            </div>
+
+            <div>
+                <button type="submit">Post</button>
+            </div>
+        </form>
+    </section>
+
+    <hr />
+
+    <section>
+        <h2>All posts</h2>
+
+        <div th:if="${#lists.isEmpty(posts)}">
+            <p>No posts yet. Be the first to post!</p>
+        </div>
+
+        <div th:each="postItem : ${posts}">
+            <article style="margin-bottom: 1.5rem; border-bottom: 1px solid #ccc; padding-bottom: 1rem;">
+                <!-- Post content -->
+                <p th:text="${postItem.content}">Post content</p>
+
+                <!-- 👍 Like button + count -->
+                <form th:action="@{'/posts/' + ${postItem.id} + '/likes'}"
+                      method="post"
+                      style="display:inline">
+
+                    <!-- CSRF token (again, for this POST) -->
+<!--                    <input type="hidden"-->
+<!--                           th:if="${_csrf != null}"-->
+<!--                           th:name="${_csrf.parameterName}"-->
+<!--                           th:value="${_csrf.token}" />-->
+
+                    <button type="submit">
+                        Like
+                        (<span th:text="${#lists.size(postItem.likes)}">0</span>)
+                    </button>
+                </form>
+
+                <form th:action="@{'/posts/' + ${postItem.id} + '/likes/unlike'}"
+                      method="post"
+                      style="display:inline; margin-left: 0.5rem;">
+
+                    <!--                    <input type="hidden"-->
+                    <!--                           th:if="${_csrf != null}"-->
+                    <!--                           th:name="${_csrf.parameterName}"-->
+                    <!--                           th:value="${_csrf.token}" />-->
+
+                    <button type="submit">Unlike</button>
+                </form>
+            </article>
+        </div>
+    </section>
 
     </body>
 </html>
