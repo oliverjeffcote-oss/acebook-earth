@@ -50,7 +50,7 @@ public class CommentController {
             comment.setPost(post);
 
             commentRepository.save(comment);
-            return new RedirectView("/posts/{id}/comments");
+            return new RedirectView("/posts/" + postId);
 
         }
 
