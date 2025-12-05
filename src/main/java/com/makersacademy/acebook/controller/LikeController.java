@@ -33,9 +33,10 @@ public class LikeController {
         }
 
         String username = principal.getName();
+//        String username = (String) principal.getAttributes().get("email");
 
-        User user = userRepository.findUserByUsername(username) // if not working hardcode user id for now
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+        User user = userRepository.findById(1L) // if not working hardcode user id for now
+                .orElseThrow(() -> new RuntimeException("Id not found: " + username));
 
         Post post = postRepository.findById(postId)
               .orElseThrow(() -> new RuntimeException("Post not found: " + postId));
@@ -47,6 +48,28 @@ public class LikeController {
             like.setUser(user);
             likeRepository.save(like);
         }
+
+        return new RedirectView("/posts");
+    }
+
+    @PostMapping("/posts/{postId}/likes/unlike")
+    public RedirectView unlikePost(@PathVariable Long postId, Principal principal) {
+        if (principal == null) {
+            return new RedirectView("/login");
+        }
+
+        String username = principal.getName();
+//        String username = (String) principal.getAttributes().get("email");
+
+        User user = userRepository.findById(1L) // if not working hardcode user id for now
+                .orElseThrow(() -> new RuntimeException("Id not found: " + username));
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found: " + postId));
+
+        likeRepository.findByPostAndUser(post, user)
+                .ifPresent(likeRepository::delete);
+
         return new RedirectView("/posts");
     }
 }
