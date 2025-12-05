@@ -22,6 +22,10 @@
     <ul th:each="post: ${posts}">
         <li th:text="${post.content}" />
     </ul>
-
+    <div class="pagination">
+        <a th:href="@{/posts(page=0)}">Page 1</a>
+        <a th:href="@{/posts(page=1)}">Page 2</a>
+        <a th:href="@{/posts(page=2)}">Page 3</a>
+    </div>
     </body>
 </html>

@@ -5,6 +5,9 @@ import com.makersacademy.acebook.model.User;
 import com.makersacademy.acebook.repository.PostRepository;
 import com.makersacademy.acebook.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.stereotype.Controller;
@@ -25,9 +28,10 @@ public class PostsController {
     private UserRepository userRepository;
 
     @GetMapping("/posts")
-    public String index(Model model) {
-        Iterable<Post> posts = postRepository.findAllByOrderByIdDesc();
-        model.addAttribute("posts", posts);
+    public String index(@RequestParam(defaultValue="0") int page,Model model) {
+        Pageable pageable = PageRequest.of(page, 10); ;
+        Page<Post> posts = postRepository.getPostsNewestFirst(pageable);
+        model.addAttribute("posts", posts.getContent());
         model.addAttribute("post", new Post());
         return "posts/index";
     }
