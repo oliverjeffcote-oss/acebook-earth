@@ -14,7 +14,7 @@ public class UsersController {
     @Autowired
     UserRepository userRepository;
 
-    @GetMapping("/templates/users/after-login")
+    @GetMapping("/users/after-login")
     public RedirectView afterLogin() {
         DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
                 .getContext()
