@@ -50,6 +50,14 @@ public class PostsController {
         return new RedirectView("/posts");
     }
 
+    @GetMapping("/posts/{id}")
+    public String showPost(@PathVariable Long id, Model model) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        model.addAttribute("post", post);
+        return "posts/showpost";
+    }
+
 //    @PostMapping("/posts")
 //    public RedirectView create(@ModelAttribute Post post, Principal principal) {
 //        String username = principal.getName();
