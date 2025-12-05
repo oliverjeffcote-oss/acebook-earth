@@ -21,7 +21,7 @@
 
     <ul th:each="post: ${posts}">
         <li th:text="${post.content}" />
+        <a th:href="@{/posts/{id}(id=${post.id})}">Show Post</a>
     </ul>
-
     </body>
 </html>
