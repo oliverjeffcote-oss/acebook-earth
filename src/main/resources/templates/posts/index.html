@@ -88,10 +88,28 @@
 <!--    <ul th:each="post: ${posts}">-->
 <!--        <li th:text="${post.content}" />-->
 <!--    </ul>-->
-    <div class="pagination">
-        <a th:href="@{/posts(page=0)}">Page 1</a>
-        <a th:href="@{/posts(page=1)}">Page 2</a>
-        <a th:href="@{/posts(page=2)}">Page 3</a>
+<!--    <div class="pagination"-->
+<!--         th:if="${page.totalPages > 0}">-->
+<!--        <a th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"-->
+<!--           th:href="@{/posts(page=${i})}"-->
+<!--           th:text="${i + 1}"-->
+<!--           th:classappend="${i} == ${currentPage} ? ' active' : ''">-->
+<!--        </a>-->
+<!--    </div>-->
+
+    <div class="pagination" th:if="${page.totalPages > 0}">
+        <a th:href="@{/posts(page=${currentPage - 1})}"
+           th:classappend="${page.first} ? ' disabled' : ''"
+           th:if="${!page.first}">
+            &laquo; Previous
+        </a>
+
+        <a th:href="@{/posts(page=${currentPage + 1})}"
+           th:classappend="${page.last} ? ' disabled' : ''"
+           th:if="${!page.last}">
+            Next &raquo;
+        </a>
     </div>
+
     </body>
 </html>
