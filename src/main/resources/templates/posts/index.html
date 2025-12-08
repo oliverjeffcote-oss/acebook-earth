@@ -32,6 +32,16 @@
                           placeholder="What's on your mind?" required></textarea>
             </div>
 
+            <!--Optional image upload -->
+            <div>
+                <label for="image">Photos (Optional)</label><br />
+                <input id="image"
+                        type="file"
+                        name="image"
+                        accept="image/*">
+
+            </div>
+
             <div>
                 <button type="submit">Post</button>
             </div>
@@ -49,6 +59,14 @@
 
         <div th:each="postItem : ${posts}">
             <article style="margin-bottom: 1.5rem; border-bottom: 1px solid #ccc; padding-bottom: 1rem;">
+
+                <!-- Show image if present -->
+                <div th:if="${postItem.imagePath != null}">
+                    <img th:src="${postItem.imagePath}"
+                        alt="Post image"
+                        style="max-width: 400px; max-height: 400px; display:block; margin-bottom: 0.5rem;" />
+                </div>
+
                 <!-- Post content -->
                 <p th:text="${postItem.content}">Post content</p>
 

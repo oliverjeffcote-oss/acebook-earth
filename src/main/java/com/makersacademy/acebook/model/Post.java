@@ -36,6 +36,9 @@ public class Post {
     @OneToMany(mappedBy = "post")
     private List<Comment> comment;
 
+    @Column(name = "image_path")
+    private String imagePath;
+
     public Post(String content, User user) {
         this.content = content;
         this.user = user;
