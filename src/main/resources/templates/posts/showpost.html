@@ -8,7 +8,7 @@
 <body>
 <h2 th:text="${post.content}"> Post content</h2>
     <form action="#" th:action="@{/posts/{id}/comment(id=${post.id})}" method="post">
-        <p>Content: <input type="text" name="content" required/></p>
+        <p>Comment: <input type="text" name="content" required/></p>
         <p><input type="submit" value="Submit" /> <input type="reset" value="Reset" /></p>
     </form>
 
