@@ -4,6 +4,7 @@ import com.makersacademy.acebook.model.Post;
 import com.makersacademy.acebook.model.User;
 import com.makersacademy.acebook.repository.PostRepository;
 import com.makersacademy.acebook.repository.UserRepository;
+import jakarta.validation.constraints.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -12,11 +13,19 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.view.RedirectView;
 
+import java.io.IOException;
+import java.nio.file.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.Principal;
 import java.util.List;
+import java.util.UUID;
 
 @Controller
 public class PostsController {
@@ -47,7 +56,10 @@ public class PostsController {
     }
 
     @PostMapping("/posts")
-    public RedirectView create(@ModelAttribute Post post) {
+    public RedirectView create(@ModelAttribute Post post,
+                                @RequestParam(value = "image", required = false)
+                                MultipartFile imageFile) {
+
         DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
                 .getContext()
                 .getAuthentication()
@@ -56,6 +68,38 @@ public class PostsController {
         User user = userRepository.findUserByUsername(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         post.setUser(user);
+
+        // Optional image upload handling
+        if (imageFile != null && !imageFile.isEmpty()) {
+            String uploadDir = "uploads"; // Folder relative to project root
+
+            try {
+                // Ensures upload directory exists
+                Files.createDirectories(Paths.get(uploadDir));
+
+                String originalFilename = StringUtils.cleanPath(imageFile.getOriginalFilename());
+                String extension = "";
+
+                int dotIndex = originalFilename.lastIndexOf('.');
+                if(dotIndex >= 0) {
+                    extension = originalFilename.substring(dotIndex); // Includes the dot
+                }
+
+                // Generate a unique filename to avoid collisions
+                String filename = UUID.randomUUID().toString() + extension;
+                Path destination = Paths.get(uploadDir).resolve(filename);
+
+                // Save the file to disk
+                Files.copy(imageFile.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
+
+                // Store the web accessible path in the post
+                post.setImagePath("/uploads/" + filename);
+
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to store uploaded file.", e);
+            }
+        }
+
         postRepository.save(post);
         return new RedirectView("/posts");
     }

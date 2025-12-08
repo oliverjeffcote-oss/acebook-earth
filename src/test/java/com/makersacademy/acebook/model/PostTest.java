@@ -17,7 +17,15 @@ public class PostTest {
         assertThat(post.getContent(), containsString("hello"));
         assertThat(post.getUser().getId(), is(1L));
         }
+    @Test
+        public void postCanStoreImagePath() {
+            User user = new User("David");
+            Post post = new Post("hello", user);
 
+            post.setImagePath("/uploads/test-image.jpg");
+
+            assertThat(post.getImagePath(), is("/uploads/test-image.jpg"));
+    }
     };
 
 
