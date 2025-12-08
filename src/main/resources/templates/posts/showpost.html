@@ -7,6 +7,10 @@
 
 <body>
 <h2 th:text="${post.content}"> Post content</h2>
+<p style="color: gray; font-size: 0.9em;">
+    Posted on:
+    <span th:text="${#temporals.format(post.createdAt, 'dd MMM yyyy HH:mm')}"></span>
+</p>
     <form action="#" th:action="@{/posts/{id}/comment(id=${post.id})}" method="post">
         <p>Comment: <input type="text" name="content" required/></p>
         <p><input type="submit" value="Submit" /> <input type="reset" value="Reset" /></p>
@@ -16,7 +20,11 @@
         <ul>
             <li th:each="singleComment : ${post.comment}">
                 <span th:text="${singleComment.content}">Comment text</span>
-                <small> - by <span th:text="${singleComment.user.username}">User</span></small>
+                <small>
+                    - by <span th:text="${singleComment.user.username}">User</span>
+                    on <span th:text="${#temporals.format(singleComment.createdAt, 'dd MMM yyyy HH:mm')}"></span>
+                </small>
+
             </li>
         </ul>
 
