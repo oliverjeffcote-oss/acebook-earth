@@ -28,11 +28,21 @@ public class PostsController {
     private UserRepository userRepository;
 
     @GetMapping("/posts")
-    public String index(@RequestParam(defaultValue="0") int page,Model model) {
-        Pageable pageable = PageRequest.of(page, 10); ;
+//    public String index(@RequestParam(defaultValue="0") int page,Model model) {
+//        Pageable pageable = PageRequest.of(page, 10); ;
+//        Page<Post> posts = postRepository.getPostsNewestFirst(pageable);
+//        model.addAttribute("posts", posts.getContent());
+//        model.addAttribute("post", new Post());
+//        return "posts/index";
+//    }
+
+    public String index(@RequestParam(defaultValue = "0") int page, Model model) {
+        Pageable pageable = PageRequest.of(page, 10);
         Page<Post> posts = postRepository.getPostsNewestFirst(pageable);
         model.addAttribute("posts", posts.getContent());
         model.addAttribute("post", new Post());
+        model.addAttribute("page", posts);         // Provides page.first, page.last
+        model.addAttribute("currentPage", page);// for highlighting active page
         return "posts/index";
     }
 
