@@ -51,6 +51,11 @@
             <article style="margin-bottom: 1.5rem; border-bottom: 1px solid #ccc; padding-bottom: 1rem;">
                 <!-- Post content -->
                 <p th:text="${postItem.content}">Post content</p>
+                <p style="color: gray; font-size: 0.9em;">
+                    Posted by:
+                    <span th:text="${postItem.user.username}"></span>
+                    on <span th:text="${#temporals.format(postItem.createdAt, 'dd MMM yyyy HH:mm')}"></span>
+                </p>
 
                 <!-- 👍 Like button + count -->
                 <form th:action="@{'/posts/' + ${postItem.id} + '/likes'}"
