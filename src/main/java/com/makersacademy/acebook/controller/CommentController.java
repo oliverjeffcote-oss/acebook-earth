@@ -38,9 +38,8 @@ public class CommentController {
                     .getContext()
                     .getAuthentication()
                     .getPrincipal();
-            String email = (String) principal.getAttributes().get("email");
-
-            User user = userRepository.findUserByUsername(email)
+            String username = (String) principal.getAttributes().get("https://myapp.com/username");
+            User user = userRepository.findUserByUsername(username)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
             Post post = postRepository.findById(postId)

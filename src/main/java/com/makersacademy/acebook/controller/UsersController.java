@@ -3,6 +3,7 @@ package com.makersacademy.acebook.controller;
 import com.makersacademy.acebook.model.User;
 import com.makersacademy.acebook.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.web.bind.annotation.*;
@@ -21,13 +22,15 @@ public class UsersController {
                 .getAuthentication()
                 .getPrincipal();
 
-        String username = (String) principal.getAttributes().get("email");
-        userRepository
-                .findUserByUsername(username)
-                .orElseGet(() -> userRepository.save(new User(username)));
+        String auth0Username = principal.getAttribute("https://myapp.com/username");
+        String userEmail = principal.getEmail();
 
+        userRepository
+                .findUserByUsername(auth0Username)
+                .orElseGet(() -> userRepository.save(new User(auth0Username, userEmail)));
         return new RedirectView("/posts");
     }
+
     @GetMapping("/users/{id}")
     public ModelAndView userProfile(@PathVariable("id") Long id) {
         User user = userRepository.findById(id).orElseThrow(() ->
@@ -36,6 +39,4 @@ public class UsersController {
         modelAndView.addObject("user", user);
         return modelAndView;
     }
-
-
 }

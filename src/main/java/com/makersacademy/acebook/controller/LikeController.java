@@ -42,7 +42,7 @@ public class LikeController {
             return new RedirectView("/login");
         }
 
-        String email = (String) principal.getAttributes().get("email");
+        String email = (String) principal.getAttributes().get("https://myapp.com/username");
         User user = userRepository.findUserByUsername(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -89,8 +89,9 @@ public class LikeController {
                 if (principal == null) {
             return new RedirectView("/login");
         }
-        String email = (String) principal.getAttributes().get("email");
-        User user = userRepository.findUserByUsername(email)
+
+        String username = (String) principal.getAttributes().get("https://myapp.com/username");
+        User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Post post = postRepository.findById(postId)

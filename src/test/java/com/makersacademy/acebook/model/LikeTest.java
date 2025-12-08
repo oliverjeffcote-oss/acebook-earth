@@ -8,7 +8,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class LikeTest {
     @Test
         public void likeHasPostAndUserId() {
-        User user = new User("Claire");
+        User user = new User("Claire", "Test@Testemail");
         user.setId(1L);
 
         Post post = new Post("hello", user);
