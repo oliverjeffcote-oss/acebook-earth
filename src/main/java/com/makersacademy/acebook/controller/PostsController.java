@@ -2,6 +2,7 @@ package com.makersacademy.acebook.controller;
 
 import com.makersacademy.acebook.model.Post;
 import com.makersacademy.acebook.model.User;
+import com.makersacademy.acebook.repository.LikeRepository;
 import com.makersacademy.acebook.repository.PostRepository;
 import com.makersacademy.acebook.repository.UserRepository;
 import jakarta.validation.constraints.Null;
@@ -36,6 +37,9 @@ public class PostsController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private LikeRepository likesRepository;
+
     @GetMapping("/posts")
 //    public String index(@RequestParam(defaultValue="0") int page,Model model) {
 //        Pageable pageable = PageRequest.of(page, 10); ;
@@ -51,7 +55,8 @@ public class PostsController {
         model.addAttribute("posts", posts.getContent());
         model.addAttribute("post", new Post());
         model.addAttribute("page", posts);         // Provides page.first, page.last
-        model.addAttribute("currentPage", page);// for highlighting active page
+        model.addAttribute("currentPage", page);
+        // for highlighting active page
         return "posts/index";
     }
 

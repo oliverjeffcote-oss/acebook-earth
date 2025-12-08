@@ -19,7 +19,7 @@ public class PostTest {
         }
     @Test
         public void postCanStoreImagePath() {
-            User user = new User("David");
+            User user = new User("David", "Test@email");
             Post post = new Post("hello", user);
 
             post.setImagePath("/uploads/test-image.jpg");
