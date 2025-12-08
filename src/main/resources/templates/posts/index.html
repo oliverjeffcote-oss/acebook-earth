@@ -16,7 +16,7 @@
 
     <section>
         <h2>Create a new post</h2>
-        <form th:action="@{/posts}" th:object="${post}" method="post">
+        <form th:action="@{/posts}" th:object="${post}" method="post" enctype="multipart/form-data">
             <!-- CSRF token (needed if Spring Security is enabled) -->
 <!--            <input type="hidden"-->
 <!--                   th:if="${_csrf != null}"-->
@@ -33,7 +33,7 @@
             </div>
 
             <!--Optional image upload -->
-            <div>
+            <div style="margin-top: 0.5rem;">
                 <label for="image">Photos (Optional)</label><br />
                 <input id="image"
                         type="file"
@@ -42,7 +42,7 @@
 
             </div>
 
-            <div>
+            <div style="margin-top: 0.5rem;">
                 <button type="submit">Post</button>
             </div>
         </form>
