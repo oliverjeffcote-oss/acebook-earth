@@ -15,8 +15,6 @@ public interface RelationshipRepository extends JpaRepository<Relationship, Long
 
     Optional<Relationship> findByRequesterAndReceiver(User receiver, User requester);
 
-    List<Relationship> findByReceiverAndStatus(User receiver, Status status);
-
     @Query("SELECT r FROM Relationship r JOIN FETCH r.requester WHERE r.receiver = :receiver AND r.status = :status")
     List<Relationship> findPendingRequests(@Param("receiver") User receiver, @Param("status") Status status);
 }

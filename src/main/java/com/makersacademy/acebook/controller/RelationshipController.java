@@ -54,9 +54,38 @@ public class RelationshipController {
         return modelAndView;
     }
 
-    // route to get a list of all requests the user has received that are Pending
+    @GetMapping("/users/{id}/friends")
+    public ModelAndView seeFriendsOnUserProfile(@PathVariable("id") Long userId) {
+        DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
 
-//    @GetMapping("/users/{id}/friends") // route to get a list of all friends (ie relationships in Accepted)
+        String auth0Username = principal.getAttribute("https://myapp.com/username");
+
+        User user = userRepository.findUserByUsername(auth0Username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        User profileOwner = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User profile not found"));
+
+        List<Relationship> friendships = relationshipRepository.findAllFriends(profileOwner.getId(), Status.ACCEPTED);
+        List<User> friends = friendships.stream()
+                .map(relationship -> {
+                    if (relationship.getRequester().getId().equals(profileOwner.getId())) {
+                        return relationship.getReceiver();
+                    } else {
+                        return relationship.getRequester();
+                    }
+                }).toList();
+
+        ModelAndView modelAndView = new ModelAndView("/users/friends");
+
+//        modelAndView.addObject("friendships", friendships); // add the relationships - not needed?
+        modelAndView.addObject("friends", friends); // add the friend user accounts to page
+        modelAndView.addObject("user", user); // add currently logged in user
+
+        return modelAndView;
+    }
 
     @PostMapping("/users/{id}/requests/add")
     public RedirectView userPage(@PathVariable("id") Long receiverId) {
