@@ -188,8 +188,7 @@
                             <p th:text="${#temporals.format(singleComment.createdAt, 'dd MMM yyyy HH:mm')}" class="text-xs text-gray-500 mt-1">Date goes here</p>
 
                             <!-- check whether a user is allowed to edit a post -->
-                            <div sec:authorize="isAuthenticated()"
-                                 th:if="${post.user.email == #authentication.principal.attributes['email']}"
+                            <div th:if="${post.user.email == #authentication.principal.attributes['email']}"
                                  class="flex items-center gap-1">
 
                                 <!-- edit a comment in a post -->
@@ -200,7 +199,7 @@
                             </a>
 
                             <!-- delete comment button -->
-                            <form th:action="@{'/posts/' + ${post.id} + '/comments/' + ${singleComment.id} + '/delete'}" method:"post">
+                            <form th:action="@{'/posts/' + ${post.id} + '/comments/' + ${singleComment.id} + '/delete'}" method="post">
 
                             <button type="submit"
                                     class="btn btn-ghost btn-xs text-gray-500 hover:text-red-600 hover:bg-red-50 gap-1"
@@ -211,6 +210,7 @@
                             </form>
                             </li>
                             </ul>
+                            </div>
 
                         </div>
                     </div>
