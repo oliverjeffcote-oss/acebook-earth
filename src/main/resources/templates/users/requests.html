@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5" >
+<head lang="en">
+    <meta charset="UTF-8"/>
+    <title th:text="${user.username}">'s Friend Requests</title>
+    <link rel="stylesheet" href="/main.css" />
+</head>
+<body>
+
+<h1>Friend Requests</h1>
+
+<div th:each="requester : ${requesters}">
+    <p th:text="${requester.username}"></p>
+
+    <span th:if="${requester.username}">Requester Name</span>
+    <form th:action="@{'/users/' + ${requester.id} + '/requests/accept'}"
+          method="post"
+          style="display:inline; margin-left: 0.5rem;">
+        <input type="hidden" name="requesterId" th:value="${requester.id}"/>
+        <button type="submit" style="background-color: green; color: white;">Accept Friend Request</button>
+    </form>
+
+    <form th:action="@{'/users/' + ${requester.id} + '/requests/reject'}"
+          method="post"
+          style="display:inline; margin-left: 0.5rem;">
+        <input type="hidden" name="requesterId" th:value="${requester.id}"/>
+        <button type="submit" style="background-color: red; color: white;">Reject Friend Request</button>
+    </form>
+</div>
