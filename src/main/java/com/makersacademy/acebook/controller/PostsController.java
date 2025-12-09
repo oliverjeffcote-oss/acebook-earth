@@ -62,6 +62,42 @@ public class PostsController {
         return "posts/index";
     }
 
+    private String saveImageToUploads(MultipartFile imageFile) {
+        try {
+            String uploadDir = "uploads";
+            Files.createDirectories(Paths.get(uploadDir));
+
+            String originalFilename = imageFile.getOriginalFilename();
+            String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            String filename = UUID.randomUUID() + extension;
+
+            Path destination = Paths.get(uploadDir).resolve(filename);
+            Files.copy(imageFile.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
+
+            return "/uploads/" + filename;
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to save uploaded image", e);
+        }
+    }
+
+    private void deleteFileFromUploads(String imagePath) {
+        try {
+            // Convert "/uploads/abc.jpg" → "uploads/abc.jpg"
+            String relativePath = imagePath.replaceFirst("/", "");
+            Path filePath = Paths.get(relativePath);
+
+            if (Files.exists(filePath)) {
+                Files.delete(filePath);
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to delete image file", e);
+        }
+    }
+
+
+
     @PostMapping("/posts")
     public RedirectView create(@ModelAttribute Post post,
                                 @RequestParam(value = "image", required = false)
@@ -133,18 +169,40 @@ public class PostsController {
     @PostMapping("/posts/{id}/update")
     public RedirectView updatePost(
             @PathVariable Long id,
-            @RequestParam("content") String updateContent
+            @RequestParam("content") String updateContent,
+            @RequestParam(value = "removeImage", required = false) String removeImage,
+            @RequestParam(value = "image", required = false) MultipartFile newImage
     ) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
         post.setContent(updateContent);
         post.setEditedAt(LocalDateTime.now());
+        // If user checks "Remove image"
+        if (removeImage != null && post.getImagePath() != null) {
+            deleteFileFromUploads(post.getImagePath());
+            post.setImagePath(null);
+        }
+        // If user uploads a new image
+        if (newImage != null && !newImage.isEmpty()) {
+            // Delete old image if it exists
+            if (post.getImagePath() != null) {
+                deleteFileFromUploads(post.getImagePath());
+            }
+            // Save new image
+            String newPath = saveImageToUploads(newImage);
+            post.setImagePath(newPath);
+        }
         postRepository.save(post);
         return new RedirectView("/posts");
     }
 
     @PostMapping("/posts/{id}/delete")
     public RedirectView deletePost(@PathVariable Long id) {
+        Post post = postRepository.findById(id).orElseThrow();
+        if (post.getImagePath() != null) {
+            deleteFileFromUploads(post.getImagePath());
+        }
+
         postRepository.deleteById(id);
         return new RedirectView("/posts");
     }
