@@ -211,7 +211,7 @@
 
             <a th:if="${!page.first}"
                th:href="@{/posts(page=${currentPage - 1})}"
-               class="btn btn-ghost btn-circle btn-sm text-gray-500 hover:text-blue-600 hover:bg-blue-50"
+               class="btn btn-ghost btn-circle btn-sm text-gray-500 hover:text-blue-600 hover:bg-blue-200 bg-blue-100"
                aria-label="Previous Page">
                 <i data-lucide="chevron-left" class="w-5 h-5"></i>
             </a>
@@ -225,7 +225,7 @@
 
             <a th:if="${!page.last}"
                th:href="@{/posts(page=${currentPage + 1})}"
-               class="btn btn-ghost btn-circle btn-sm text-gray-500 hover:text-blue-600 hover:bg-blue-50"
+               class="btn btn-ghost btn-circle btn-sm text-gray-500 hover:text-blue-600 hover:bg-blue-200 bg-blue-100"
                aria-label="Next Page">
                 <i data-lucide="chevron-right" class="w-5 h-5"></i>
             </a>
