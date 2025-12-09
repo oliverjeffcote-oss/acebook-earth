@@ -45,7 +45,7 @@ public class RelationshipController {
         List<Relationship> pendingRequests = relationshipRepository.findPendingRequests(user, Status.PENDING);
         List<User> requesters = pendingRequests.stream().map(Relationship::getRequester).toList();
 
-        ModelAndView modelAndView = new ModelAndView("/users/friend-requests");
+        ModelAndView modelAndView = new ModelAndView("/users/requests");
 
         modelAndView.addObject("requesters", requesters); // to see person requesting
         modelAndView.addObject("pendingRequests", pendingRequests); // so we can have accept/reject buttons
@@ -80,7 +80,6 @@ public class RelationshipController {
 
         ModelAndView modelAndView = new ModelAndView("/users/friends");
 
-//        modelAndView.addObject("friendships", friendships); // add the relationships - not needed?
         modelAndView.addObject("friends", friends); // add the friend user accounts to page
         modelAndView.addObject("user", user); // add currently logged in user
 
@@ -103,7 +102,6 @@ public class RelationshipController {
                 .orElseThrow(() -> new RuntimeException("Receiver user not found"));
 
         //check if relationship record exists with both variants (requester and receiver ids)
-
         boolean relationshipExists = relationshipRepository.findByRequesterAndReceiver(requester, receiver).isPresent() ||
                 relationshipRepository.findByRequesterAndReceiver(receiver, requester).isPresent();
 
