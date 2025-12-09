@@ -185,8 +185,8 @@
                         </button>
                     </div>
                 </form>
-
-            </div>
+                <a th:href="@{/posts/{id}(id=${postItem.id})}">Show Post</a>
+            </article>
         </div>
         <div class="join grid grid-cols-2 mt-6" th:if="${page.totalPages > 0}">
             <a th:if="${!page.first}"

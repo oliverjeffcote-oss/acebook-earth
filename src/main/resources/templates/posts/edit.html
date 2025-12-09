@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Edit Post</title>
+</head>
+<body>
+
+<h2>Edit Post</h2>
+
+<form th:action="@{'/posts/' + ${post.id} + '/update'}" method="post">
+
+    <!-- Editable content field -->
+    <textarea name="content" rows="5" cols="50"
+              th:text="${post.content}">
+    </textarea>
+
+    <button type="submit">Save</button>
+</form>
+
+<!-- show last edited timestamp -->
+<p th:if="${post.editedAt != null}">
+    Last edited on:
+    <span th:text="${#temporals.format(post.editedAt, 'dd MMM yyyy HH:mm')}"></span>
+</p>
+
+<a th:href="@{/posts}">Cancel</a>
+
+</body>
+</html>
