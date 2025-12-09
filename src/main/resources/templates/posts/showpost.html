@@ -8,6 +8,8 @@
 <body>
 <h2 th:text="${post.content}"> Post content</h2>
 <p style="color: gray; font-size: 0.9em;">
+    Posted by:
+    <span th:text="${post.user.username}"></span>
     Posted on:
     <span th:text="${#temporals.format(post.createdAt, 'dd MMM yyyy HH:mm')}"></span>
 </p>
@@ -23,10 +25,19 @@
                 <small>
                     - by <span th:text="${singleComment.user.username}">User</span>
                     on <span th:text="${#temporals.format(singleComment.createdAt, 'dd MMM yyyy HH:mm')}"></span>
-                </small>
+                    <span th:if="${singleComment.editedAt != null}">(edited)</span>
 
+                </small>
+                <!-- edit a comment in a post -->
+                <a th:href="@{'/posts/' + ${post.id} + '/comments/' + ${singleComment.id} + '/edit'}">Edit</a>
+
+                <!-- delete comment button -->
+                <form th:action="@{'/posts/' + ${post.id} + '/comments/' + ${singleComment.id} + '/delete'}"
+                      method="post"
+                      style="display:inline; margin-left: 0.5rem;">
+                    <button type="submit">Delete</button>
+                </form>
             </li>
         </ul>
-
 </body>
 </html>

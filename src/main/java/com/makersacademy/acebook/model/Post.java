@@ -28,6 +28,9 @@ public class Post {
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "edited_at")
+    private LocalDateTime editedAt;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

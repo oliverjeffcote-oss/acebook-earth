@@ -1,5 +1,6 @@
 package com.makersacademy.acebook.controller;
 
+import org.springframework.ui.Model;
 import com.makersacademy.acebook.model.User;
 import com.makersacademy.acebook.repository.CommentRepository;
 import com.makersacademy.acebook.repository.PostRepository;
@@ -10,12 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.view.RedirectView;
 
 import javax.swing.*;
+import java.time.LocalDateTime;
 
 @Controller
 public class CommentController {
@@ -55,4 +58,43 @@ public class CommentController {
 
         }
 
+        @GetMapping("/posts/{postId}/comments/{commentId}/edit")
+        public String editComment(
+                @PathVariable Long postId,
+                @PathVariable Long commentId,
+                Model model
+        ) {
+            Comment comment = commentRepository.findById(commentId)
+                    .orElseThrow(() -> new RuntimeException("Comment not found"));
+            model.addAttribute("comment", comment);
+            model.addAttribute("postId", postId);
+            return "comments/edit";
+        }
+
+        @PostMapping("/posts/{postId}/comments/{commentId}/update")
+        public RedirectView updateComment(
+                @PathVariable Long postId,
+                @PathVariable Long commentId,
+                @RequestParam("content") String updatedContent
+    ) {
+            Comment comment = commentRepository.findById(commentId)
+                    .orElseThrow(() -> new RuntimeException("Comment not found"));
+
+            comment.setContent(updatedContent);
+            comment.setEditedAt(LocalDateTime.now());
+            commentRepository.save(comment);
+
+            return new RedirectView("/posts/" + postId);
     }
+
+        @PostMapping("/posts/{postId}/comments/{commentId}/delete")
+        public RedirectView deleteComment(
+                @PathVariable Long postId,
+                @PathVariable Long commentId
+    ) {
+            commentRepository.deleteById(commentId);
+            return new RedirectView("/posts/" + postId);
+    }
+
+
+}

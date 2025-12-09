@@ -73,6 +73,7 @@
                     Posted by:
                     <span th:text="${postItem.user.username}"></span>
                     on <span th:text="${#temporals.format(postItem.createdAt, 'dd MMM yyyy HH:mm')}"></span>
+                    <span th:if="${postItem.editedAt != null}">(edited)</span>
                 </p>
 
                 <!-- 👍 Like button + count -->
@@ -104,6 +105,16 @@
                     <button type="submit">Unlike</button>
                 </form>
                 <a th:href="@{/posts/{id}(id=${postItem.id})}">Show Post</a>
+                <!-- edit post bitton -->
+                <a th:href="@{'/posts/' + ${postItem.id} + '/edit'}" style="margin-left: 0.5rem;">
+                    Edit
+                </a>
+                <!-- delete post button -->
+                <form th:action="@{'/posts/' + ${postItem.id} + '/delete'}"
+                      method="post"
+                      style="display:inline; margin-left: 0.5rem;">
+                    <button type="submit">Delete</button>
+                </form>
             </article>
         </div>
     </section>
