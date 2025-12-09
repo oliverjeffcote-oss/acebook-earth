@@ -185,6 +185,18 @@
                             <a th:href="@{/users/{id}(id=${singleComment.user.id})}" th:text="${singleComment.user.username}" class="font-semibold text-gray-900 hover:underline"></a>
                             <p th:text="${singleComment.content}" class="text-gray-700"></p>
                             <p th:text="${#temporals.format(singleComment.createdAt, 'dd MMM yyyy HH:mm')}" class="text-xs text-gray-500 mt-1">Date goes here</p>
+
+                            <!-- edit a comment in a post -->
+                            <a th:href="@{'/posts/' + ${post.id} + '/comments/' + ${singleComment.id} + '/edit'}">Edit</a>
+                            <!-- delete comment button -->
+                            <form th:action="@{'/posts/' + ${post.id} + '/comments/' + ${singleComment.id} + '/delete'}"
+                                  method="post"
+                                  style="display:inline; margin-left: 0.5rem;">
+                                <button type="submit">Delete</button>
+                            </form>
+                            </li>
+                            </ul>
+
                         </div>
                     </div>
                 </div>

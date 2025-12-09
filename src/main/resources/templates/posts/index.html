@@ -121,6 +121,17 @@
                            th:text="${postItem.user.username}">Username</a>
                         <p class="text-xs text-gray-500"
                            th:text="${#temporals.format(postItem.createdAt, 'dd MMM yyyy HH:mm')}">Date</p>
+
+                        <a th:href="@{'/posts/' + ${postItem.id} + '/edit'}" style="margin-left: 0.5rem;">
+                            Edit
+                        </a>
+                        <!-- delete post button -->
+                        <form th:action="@{'/posts/' + ${postItem.id} + '/delete'}"
+                              method="post"
+                              style="display:inline; margin-left: 0.5rem;">
+                            <button type="submit">Delete</button>
+                        </form>
+
                     </div>
                 </div>
 
