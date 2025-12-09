@@ -16,5 +16,8 @@ public interface RelationshipRepository extends JpaRepository<Relationship, Long
 
     @Query("SELECT r FROM Relationship r JOIN FETCH r.requester WHERE r.receiver = :receiver AND r.status = :status")
     List<Relationship> findPendingRequests(@Param("receiver") User receiver, @Param("status") Status status);
+
+    @Query("SELECT r FROM Relationship r WHERE (r.requester.id = :userId OR r.receiver.id = :userId) AND r.status = :status")
+    List<Relationship> findAllFriends(@Param("userId") Long userId, @Param("status") Status status);
 }
 
