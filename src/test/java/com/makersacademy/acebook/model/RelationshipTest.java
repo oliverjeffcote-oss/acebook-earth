@@ -10,10 +10,10 @@ import static org.hamcrest.CoreMatchers.is;
 public class RelationshipTest {
     @Test
         public void relationshipHasUserIdsAndStatus() {
-        User user1 = new User("Ollie");
+        User user1 = new User("Ollie", "Test@testemail");
         user1.setId(1L);
 
-        User user2 = new User("Claire");
+        User user2 = new User("Claire", "Test@Testemail");
         user2.setId(2L);
 
         Relationship relationship = new Relationship(user1, user2);
