@@ -13,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.view.RedirectView;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.security.Principal;
 
@@ -29,7 +30,7 @@ public class LikeController {
     private UserRepository userRepository;
 
     @PostMapping("/posts/{postId}/likes")
-    public RedirectView likePost(@PathVariable Long postId) {
+    public RedirectView likePost(@PathVariable Long postId, HttpServletRequest request) {
 //        if (principal == null) {
 //            return new RedirectView("/login");
 //        }
@@ -64,12 +65,19 @@ public class LikeController {
             like.setUser(user);
             likeRepository.save(like);
         }
+        String referer = request.getHeader("Referer");
+
+        // 2. Check if it exists (some privacy tools hide it)
+        if (referer != null && !referer.isBlank()) {
+            // Redirect back to exactly where they came from
+            return new RedirectView(referer);
+        }
 
         return new RedirectView("/posts");
     }
 
     @PostMapping("/posts/{postId}/likes/unlike")
-    public RedirectView unlikePost(@PathVariable Long postId) {
+    public RedirectView unlikePost(@PathVariable Long postId, HttpServletRequest request) {
 //        if (principal == null) {
 //            return new RedirectView("/login");
 //        }
@@ -100,6 +108,14 @@ public class LikeController {
 
         likeRepository.findByPostAndUser(post, user)
                 .ifPresent(likeRepository::delete);
+
+        String referer = request.getHeader("Referer");
+
+        // 2. Check if it exists (some privacy tools hide it)
+        if (referer != null && !referer.isBlank()) {
+            // Redirect back to exactly where they came from
+            return new RedirectView(referer);
+        }
 
         return new RedirectView("/posts");
     }
