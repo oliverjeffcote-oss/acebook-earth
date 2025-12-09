@@ -39,4 +39,19 @@ public class UsersController {
         modelAndView.addObject("user", user);
         return modelAndView;
     }
+
+
+    @GetMapping("/users/profile")
+    public RedirectView currentUserProfile() {
+        DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        String auth0Username = principal.getAttribute("https://myapp.com/username");
+
+        User user = userRepository.findUserByUsername(auth0Username).orElseThrow();
+
+        return new RedirectView("/users/" + user.getId());
+    }
 }

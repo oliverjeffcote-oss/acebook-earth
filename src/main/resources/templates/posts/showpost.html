@@ -114,12 +114,14 @@
                     <div class="avatar mr-3">
                         <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
                             <!-- avatar -->
-                            <img src="https://placehold.co/40x40/2563eb/ffffff?text=T.P." alt="User Avatar 1" />
+                            <img th:src="@{'https://ui-avatars.com/api/?name=' + ${post.user.username} + '&background=random&color=fff'}"
+                                  alt="User Avatar 1" />
                         </div>
                     </div>
+                    <!-- post owner username -->
                     <div>
-                        <a href="#" class="font-semibold text-gray-900">Username Goes Here</a>
-                        <p class="text-xs text-gray-500">Date Goes Here</p>
+                        <a th:href="@{/users/{id}(id=${post.user.id})}" th:text="${post.user.username}"class="font-semibold text-gray-900">Username goes here</a>
+                        <p  th:text="${#temporals.format(post.createdAt, 'dd MMM yyyy HH:mm')}" class="text-xs text-gray-500">Date Goes Here</p>
                     </div>
                 </div>
 
@@ -175,13 +177,14 @@
                     <div class="flex items-start gap-2">
                         <div class="avatar shrink-0">
                             <div class="w-7 h-7 rounded-full bg-yellow-400">
-                                <img src="https://placehold.co/28x28/fcd34d/000000?text=V.A." alt="Commenter Avatar" />
+                                <img th:src="@{'https://ui-avatars.com/api/?name=' + ${singleComment.user.username} + '&background=random&color=fff'}"
+                                     alt="Commenter Avatar" />
                             </div>
                         </div>
                         <div class="bg-gray-100 p-2 rounded-xl text-sm max-w-[85%]">
-                            <a href="#" th:text="${singleComment.user.username}" class="font-semibold text-gray-900 hover:underline"></a>
+                            <a th:href="@{/users/{id}(id=${singleComment.user.id})}" th:text="${singleComment.user.username}" class="font-semibold text-gray-900 hover:underline"></a>
                             <p th:text="${singleComment.content}" class="text-gray-700"></p>
-                            <p class="text-xs text-gray-500 mt-1">Date goes here</p>
+                            <p th:text="${#temporals.format(singleComment.createdAt, 'dd MMM yyyy HH:mm')}" class="text-xs text-gray-500 mt-1">Date goes here</p>
                         </div>
                     </div>
                 </div>
