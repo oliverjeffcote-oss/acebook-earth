@@ -7,21 +7,58 @@
 
 <h2>Edit Post</h2>
 
-<form th:action="@{'/posts/' + ${post.id} + '/update'}" method="post">
+<!--form for image upload-->
+<form th:action="@{'/posts/' + ${post.id} + '/update'}"
+      method="post"
+      enctype="multipart/form-data">
 
-    <!-- Editable content field -->
-    <textarea name="content" rows="5" cols="50"
+    <!--this is the editable text field-->
+    <label for="content">Content:</label><br>
+    <textarea id="content"
+              name="content"
+              rows="5"
+              cols="50"
               th:text="${post.content}">
     </textarea>
 
-    <button type="submit">Save</button>
+    <br><br>
+
+    <!--this shows current image (only if exists)-->
+    <div th:if="${post.imagePath != null}">
+        <p>Current Image:</p>
+
+        <img th:src="${post.imagePath}"
+             alt="Post image"
+             style="max-width:250px; display:block; margin-bottom:10px;"/>
+
+        <!--this removes image checkbox-->
+        <label>
+            <input type="checkbox" name="removeImage">
+            Remove this image
+        </label>
+
+        <br><br>
+    </div>
+
+    <!--this is where we  upload a new image-->
+    <div>
+        <label for="image">Upload a new image (optional):</label><br>
+        <input type="file" name="image" id="image" accept="image/*">
+    </div>
+
+    <br>
+
+    <!--Save button-->
+    <button type="submit">Save Changes</button>
 </form>
 
-<!-- show last edited timestamp -->
+<!--this shows last edited timestamp-->
 <p th:if="${post.editedAt != null}">
     Last edited on:
     <span th:text="${#temporals.format(post.editedAt, 'dd MMM yyyy HH:mm')}"></span>
 </p>
+
+<br>
 
 <a th:href="@{/posts}">Cancel</a>
 

@@ -196,8 +196,11 @@
                         </button>
                     </div>
                 </form>
-                <a th:href="@{/posts/{id}(id=${postItem.id})}">Show Post</a>
-            </article>
+                <a th:href="@{/posts/{id}(id=${postItem.id})}">
+                    View Replies • <span th:text="${#lists.size(postItem.comment)}"></span> replies
+                </a>
+
+                </article>
         </div>
         <div class="join grid grid-cols-2 mt-6" th:if="${page.totalPages > 0}">
             <a th:if="${!page.first}"
