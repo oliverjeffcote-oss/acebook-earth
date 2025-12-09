@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5" >
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
+      xmlns:method="http://www.w3.org/1999/xhtml">
 <head lang="en">
     <meta charset="UTF-8"/>
     <title>Acebook - Posts</title>
@@ -186,13 +187,27 @@
                             <p th:text="${singleComment.content}" class="text-gray-700"></p>
                             <p th:text="${#temporals.format(singleComment.createdAt, 'dd MMM yyyy HH:mm')}" class="text-xs text-gray-500 mt-1">Date goes here</p>
 
-                            <!-- edit a comment in a post -->
-                            <a th:href="@{'/posts/' + ${post.id} + '/comments/' + ${singleComment.id} + '/edit'}">Edit</a>
+                            <!-- check whether a user is allowed to edit a post -->
+                            <div sec:authorize="isAuthenticated()"
+                                 th:if="${post.user.email == #authentication.principal.attributes['email']}"
+                                 class="flex items-center gap-1">
+
+                                <!-- edit a comment in a post -->
+                            <a th:href="@{'/posts/' + ${post.id} + '/comments/' + ${singleComment.id} + '/edit'}"
+                               class="btn btn-ghost btn-xs text-gray-500 hover:text-blue-500 hover:bg-blue-50 gap-1">
+                                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                                <span class="hidden sm:inline"></span>
+                            </a>
+
                             <!-- delete comment button -->
-                            <form th:action="@{'/posts/' + ${post.id} + '/comments/' + ${singleComment.id} + '/delete'}"
-                                  method="post"
-                                  style="display:inline; margin-left: 0.5rem;">
-                                <button type="submit">Delete</button>
+                            <form th:action="@{'/posts/' + ${post.id} + '/comments/' + ${singleComment.id} + '/delete'}" method:"post">
+
+                            <button type="submit"
+                                    class="btn btn-ghost btn-xs text-gray-500 hover:text-red-600 hover:bg-red-50 gap-1"
+                                    onclick="return confirm('Are you sure you want to delete this post?');">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                <span class="hidden sm:inline"></span>
+                            </button>
                             </form>
                             </li>
                             </ul>
@@ -202,7 +217,6 @@
                 </div>
 
                 <!-- comment section (Input form) -->
-
 
                 <form action="#" th:action="@{/posts/{id}/comment(id=${post.id})}" method="POST" class="mt-1.5 flex items-center space-x-2">
                     <div class="avatar">
