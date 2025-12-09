@@ -24,6 +24,9 @@ public class User {
     @Column(name = "username")
     private String username;
 
+    @Column(name = "email_address")
+    private String email;
+
     @Column(name = "enabled")
     private boolean enabled;
 
@@ -69,13 +72,15 @@ public class User {
         this.enabled = TRUE;
     }
 
-    public User(String username) {
+    public User(String username, String email) {
         this.username = username;
+        this.email = email;
         this.enabled = TRUE;
     }
 
-    public User(String username, boolean enabled) {
+    public User(String username, boolean enabled, String email) {
         this.username = username;
+        this.email = email;
         this.enabled = enabled;
     }
 }

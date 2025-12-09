@@ -10,7 +10,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class UserTest {
     @Test
         public void usernameIsSetAndUserIsEnabled() {
-        User user = new User("Ollie");
+        User user = new User("Ollie", "TestEmail");
         assertThat(user.getUsername(), containsString("Ollie"));
         assertThat(user.isEnabled(), is(true));
     }

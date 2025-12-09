@@ -3,6 +3,7 @@ package com.makersacademy.acebook.controller;
 import com.makersacademy.acebook.model.Comment;
 import com.makersacademy.acebook.model.Post;
 import com.makersacademy.acebook.model.User;
+import com.makersacademy.acebook.repository.LikeRepository;
 import com.makersacademy.acebook.repository.CommentRepository;
 import com.makersacademy.acebook.repository.PostRepository;
 import com.makersacademy.acebook.repository.UserRepository;
@@ -70,9 +71,10 @@ public class PostsController {
                 .getContext()
                 .getAuthentication()
                 .getPrincipal();
-        String email = (String) principal.getAttributes().get("email");
-        User user = userRepository.findUserByUsername(email)
+        String username = (String) principal.getAttributes().get("https://myapp.com/username");
+        User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
         post.setUser(user);
 
         // Optional image upload handling

@@ -38,10 +38,12 @@ public class SignUpTest {
     @Test
     public void successfulSignUpAlsoLogsInUser() {
         String email = faker.name().username() + "@email.com";
+        String username = "UsernameTest123";
 
         driver.get("http://localhost:8081/");
         driver.findElement(By.linkText("Sign up")).click();
         driver.findElement(By.name("email")).sendKeys(email);
+        driver.findElement(By.name("username")).sendKeys(username);
         driver.findElement(By.name("password")).sendKeys("P@55qw0rd");
         driver.findElement(By.name("action")).click();
 //        driver.findElement(By.name("action")).click(); // This line is a duplicate and breaks the testing
