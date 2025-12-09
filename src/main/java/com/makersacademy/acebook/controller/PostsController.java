@@ -1,7 +1,9 @@
 package com.makersacademy.acebook.controller;
 
+import com.makersacademy.acebook.model.Comment;
 import com.makersacademy.acebook.model.Post;
 import com.makersacademy.acebook.model.User;
+import com.makersacademy.acebook.repository.CommentRepository;
 import com.makersacademy.acebook.repository.PostRepository;
 import com.makersacademy.acebook.repository.UserRepository;
 import jakarta.validation.constraints.Null;
@@ -24,6 +26,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,6 +38,9 @@ public class PostsController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
 
     @GetMapping("/posts")
 //    public String index(@RequestParam(defaultValue="0") int page,Model model) {
@@ -108,10 +114,40 @@ public class PostsController {
     public String showPost(@PathVariable Long id, Model model) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
+        List<Comment> comments = commentRepository.getCommentsNewestFirst(post);
         model.addAttribute("post", post);
+        model.addAttribute("comments", comments);
         return "posts/showpost";
     }
 
+    @GetMapping("/posts/{id}/edit")
+    public String editPost(@PathVariable Long id, Model model) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        model.addAttribute("post", post);
+        return "posts/edit";
+    }
+
+    @PostMapping("/posts/{id}/update")
+    public RedirectView updatePost(
+            @PathVariable Long id,
+            @RequestParam("content") String updateContent
+    ) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        post.setContent(updateContent);
+        post.setEditedAt(LocalDateTime.now());
+        postRepository.save(post);
+        return new RedirectView("/posts");
+    }
+
+    @PostMapping("/posts/{id}/delete")
+    public RedirectView deletePost(@PathVariable Long id) {
+        postRepository.deleteById(id);
+        return new RedirectView("/posts");
+    }
+
+    }
 //    @PostMapping("/posts")
 //    public RedirectView create(@ModelAttribute Post post, Principal principal) {
 //        String username = principal.getName();
@@ -121,4 +157,4 @@ public class PostsController {
 //        postRepository.save(post);
 //        return new RedirectView("/posts");
 //    }
-}
+//}
