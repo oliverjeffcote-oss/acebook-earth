@@ -207,24 +207,35 @@
 
     </div>
 
-        <div class="join grid grid-cols-2 mt-6" th:if="${page.totalPages > 0}">
+        <div class="flex justify-center items-center gap-4 mt-8" th:if="${page.totalPages > 0}">
+
             <a th:if="${!page.first}"
                th:href="@{/posts(page=${currentPage - 1})}"
-               class="join-item btn btn-outline btn-sm">
-                « Previous
+               class="btn btn-ghost btn-circle btn-sm text-gray-500 hover:text-blue-600 hover:bg-blue-50"
+               aria-label="Previous Page">
+                <i data-lucide="chevron-left" class="w-5 h-5"></i>
             </a>
-            <button th:if="${page.first}" disabled class="join-item btn btn-outline btn-sm btn-disabled">
-                « Previous
+
+            <button th:if="${page.first}"
+                    disabled
+                    class="btn btn-ghost btn-circle btn-sm text-gray-300 btn-disabled">
+                <i data-lucide="chevron-left" class="w-5 h-5"></i>
             </button>
+
 
             <a th:if="${!page.last}"
                th:href="@{/posts(page=${currentPage + 1})}"
-               class="join-item btn btn-outline btn-sm">
-                Next »
+               class="btn btn-ghost btn-circle btn-sm text-gray-500 hover:text-blue-600 hover:bg-blue-50"
+               aria-label="Next Page">
+                <i data-lucide="chevron-right" class="w-5 h-5"></i>
             </a>
-            <button th:if="${page.last}" disabled class="join-item btn btn-outline btn-sm btn-disabled">
-                Next »
+
+            <button th:if="${page.last}"
+                    disabled
+                    class="btn btn-ghost btn-circle btn-sm text-gray-300 btn-disabled">
+                <i data-lucide="chevron-right" class="w-5 h-5"></i>
             </button>
+
         </div>
 
 </main>
