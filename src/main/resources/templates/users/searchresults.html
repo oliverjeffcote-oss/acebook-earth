@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5" lang="">
+<head lang="en">
+    <meta charset="UTF-8" />
+    <title th:text="|Search results for '${query}' - Acebook|">
+        Acebook - Search
+    </title>
+    <link rel="stylesheet" href="/main.css" />
+</head>
+<body>
+
+<h2 th:text="|Search results for '${query}'|">
+    Search results
+</h2>
+
+<form th:action="@{/user/search}" method="get" style="margin-bottom: 1rem;">
+    <label>
+        <input type="text"
+                name="query"
+                th:value="${query}"
+                placeholder="Search user..."
+                />
+    </label>
+    <button type="submit">Search</button>
+</form>
+
+<div th:if="${#lists.isEmpty(results)}">
+    <p>No users found.</p>
+</div>
+
+<div th:if="${!#lists.isEmpty(results)}">
+    <p th:text="${#lists.size(results)} + ' user(s) found.'">Users found.</p>
+
+    <ul>
+        <li th:each="u : ${results}">
+            <!-- Profile image thumbnail if available -->
+            <span th:if="${u.imagePath != null}">
+                <img th:src="${u.imagePath}"
+                alt="Profile photo"
+                style="width: 40px; height:40px; object-fit:cover; border-radius:50%; margin-right:0.5rem;" />
+            </span>
+
+            <!-- Username linked to their profile -->
+            <a th:href="@{/users/{id}(id=${u.id})}"
+                th:text="${u.username}">
+                Username
+            </a>
+
+            <!-- Optional: short description preview -->
+            <span th:if="${u.description !=null and !#strings.isEmpty(u.description)}"
+                    class="text-sm text-gray-700">
+                        <span class="font-semibold">About:</span>
+                        <span th:text="${u.description}">User bio</span>
+            </span>
+        </li>
+    </ul>
+</div>
+
+</body>
+</html>

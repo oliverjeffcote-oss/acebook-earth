@@ -15,11 +15,19 @@
     <div class="navbar w-full max-w-7xl mx-auto px-4">
         <div class="navbar-start">
             <a href="/posts" class="btn btn-ghost text-2xl font-extrabold text-blue-600 mr-4">AceBook</a>
+
             <div class="hidden lg:flex">
-                <label class="input input-sm input-bordered flex items-center gap-2 rounded-full navbar-search-input">
-                    <i data-lucide="search" class="w-4 h-4 text-gray-500"></i>
-                    <input type="text" class="grow placeholder-gray-500 bg-transparent" placeholder="Search AceBook" />
-                </label>
+                <form th:action="@{/users/search}" method="get" class="w-full">
+                    <label class="input input-sm input-bordered flex items-center gap-2 rounded-full navbar-search-input w-full">
+                        <i data-lucide="search" class="w-4 h-4 text-gray-500"></i>
+                        <input
+                                type="text"
+                                name="query"
+                                class="grow placeholder-gray-500 bg-transparent"
+                                placeholder="Search AceBook"
+                        />
+                    </label>
+                </form>
             </div>
         </div>
 
