@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Friends</title>
+    <link rel="stylesheet" href="/main.css" />
+</head>
+<body>
+
+<h1>Friends</h1>
+
+<!-- show message if no friends -->
+<div th:if="${friends.isEmpty()}">
+    <p>You have no friends yet.</p>
+</div>
+
+<!-- show list of friend usernames -->
+<ul th:if="${!friends.isEmpty()}">
+    <li th:each="friend : ${friends}" th:text="${friend.username}"></li>
+</ul>
+
+</body>
+</html>

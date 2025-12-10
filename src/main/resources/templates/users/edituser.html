@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head lang="en">
+    <meta charset="UTF-8"/>
+    <title th:text="Edit + ${user.username} + '’s Acebook Profile'">Acebook Profile</title>
+    <link rel="stylesheet" href="/main.css" />
+</head>
+<!--<body>-->
+<!--<h2>-->
+<!--    Edit <span th:text="${user.username}">Username</span>’s profile page-->
+<!--</h2>-->
+
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org"-->
+<!--      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">-->
+<!--<head lang="en">-->
+<!--    <meta charset="UTF-8"/>-->
+<!--    <title th:text="${user.username} + ''s Profile – Edit'">Edit Profile</title>-->
+<!--    <link rel="stylesheet" href="/main.css" />-->
+<!--</head>-->
+<body>
+
+<h2>Edit your Acebook profile</h2>
+
+<p>
+    Signed in as
+    <span th:text="${user.username}">Username</span>
+</p>
+
+<hr/>
+
+<form th:action="@{/users/edit}" th:object="${user}"
+      method="post" enctype="multipart/form-data">
+
+    <!-- CSRF token (uncomment if you're using CSRF protection) -->
+    <!--
+    <input type="hidden"
+           th:if="${_csrf != null}"
+           th:name="${_csrf.parameterName}"
+           th:value="${_csrf.token}" />
+    -->
+
+    <!-- Current photo preview -->
+    <div style="margin-bottom: 1rem;">
+        <label><strong>Current photo:</strong></label><br/>
+        <span th:if="${user.imagePath != null}">
+            <img th:src="${user.imagePath}"
+                 alt="Current profile photo"
+                 style="max-width: 200px; max-height: 200px; display:block; margin-top:0.5rem;" />
+        </span>
+        <span th:if="${user.imagePath == null}">
+            No photo uploaded yet
+        </span>
+    </div>
+
+    <!-- Upload new photo -->
+    <div style="margin-bottom: 1rem;">
+        <label for="image"><strong>Upload new photo (optional):</strong></label><br/>
+        <input id="image" type="file" name="image" accept="image/*"/>
+        <p style="font-size: 0.9rem; color: #666; margin-top: 0.25rem;">
+            If you choose a new photo, it will replace the current one.
+        </p>
+    </div>
+
+    <!-- About Me -->
+    <div style="margin-bottom: 1rem;">
+        <label for="description"><strong>About Me:</strong></label><br/>
+        <textarea id="description"
+                  th:field="*{description}"
+                  rows="4"
+                  cols="50"
+                  placeholder="Tell people a bit about yourself"></textarea>
+    </div>
+
+    <!-- Birthday -->
+    <div style="margin-bottom: 1rem;">
+        <label for="birthday"><strong>Birthday:</strong></label><br/>
+        <input id="birthday"
+               type="date"
+               th:field="*{birthday}" />
+    </div>
+
+    <!-- Location -->
+    <div style="margin-bottom: 1rem;">
+        <label for="location"><strong>Location:</strong></label><br/>
+        <input id="location"
+               type="text"
+               th:field="*{location}"
+               placeholder="e.g. London, UK" />
+    </div>
+
+    <!-- Education -->
+    <div style="margin-bottom: 1rem;">
+        <label for="education"><strong>Education:</strong></label><br/>
+        <input id="education"
+               type="text"
+               th:field="*{education}"
+               placeholder="e.g. Makers Academy, University..." />
+    </div>
+
+    <!-- Where I'm From -->
+    <div style="margin-bottom: 1rem;">
+        <label for="birthplace"><strong>Where I'm From:</strong></label><br/>
+        <input id="birthplace"
+               type="text"
+               th:field="*{birthplace}"
+               placeholder="e.g. Glasgow, Scotland" />
+    </div>
+
+    <!-- Where I Work -->
+    <div style="margin-bottom: 1rem;">
+        <label for="employment"><strong>Where I Work:</strong></label><br/>
+        <input id="employment"
+               type="text"
+               th:field="*{employment}"
+               placeholder="e.g. Junior Developer at..." />
+    </div>
+
+    <hr/>
+
+    <div style="margin-top: 1rem;">
+        <button type="submit" class="btn btn-primary">💾 Save changes</button>
+        <a th:href="@{/users/profile}" class="btn" style="margin-left: 0.5rem;">Cancel</a>
+    </div>
+</form>
+
+</body>
+</html>

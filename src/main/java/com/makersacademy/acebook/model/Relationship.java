@@ -26,8 +26,8 @@ public class Relationship {
     private User receiver;
 
     @Enumerated(EnumType.STRING)
-    private Status status;
-
+    @Column(nullable = false)
+    private Status status = Status.PENDING; //sets default status as PENDING for new records
 
     public Relationship(User requester, User receiver) {
         this.requester = requester;
