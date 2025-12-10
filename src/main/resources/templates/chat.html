@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head lang="en">
+    <meta charset="UTF-8"/>
+    <title>Acebook - Chat</title>
+    <link rel="stylesheet" href="/main.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body class="bg-gray-100 h-screen flex flex-col" data-theme="light">
+
+<div sec:authorize="isAuthenticated()" class="navbar-sticky bg-white shadow-lg border-b border-gray-200 z-50 relative flex-none">
+    <div class="navbar w-full max-w-7xl mx-auto px-4">
+        <div class="navbar-start">
+            <a href="/posts" class="btn btn-ghost text-2xl font-extrabold text-blue-600 mr-4">AceBook</a>
+        </div>
+
+        <div class="navbar-center flex flex-grow justify-center lg:flex-none">
+            <a href="/posts" class="btn btn-ghost btn-sm">Feed</a>
+            <a href="/chat" class="btn btn-primary btn-sm rounded-full">Chat</a>
+        </div>
+
+        <div class="navbar-end space-x-2">
+            <span class="hidden md:inline-block text-sm text-gray-500 mr-2">
+                 Hi, <span th:text="${myUsername}">User</span>
+            </span>
+
+            <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+                    <div class="w-10 rounded-full ring ring-gray-300">
+                        <img th:src="@{'https://ui-avatars.com/api/?name=' + ${myUsername} + '&background=random&color=fff'}" alt="User Avatar" />
+                    </div>
+                </div>
+                <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                    <li><a href="/logout">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<main class="flex-grow overflow-hidden pt-6 pb-6 px-4">
+    <div class="max-w-7xl mx-auto h-full flex gap-6">
+
+        <div class="w-1/4 hidden md:flex flex-col bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden h-[calc(100vh-8rem)]">
+            <div class="p-4 border-b border-gray-100 bg-gray-50">
+                <h3 class="font-bold text-gray-700">Contacts</h3>
+            </div>
+            <div class="overflow-y-auto flex-grow">
+                <ul class="menu w-full p-2">
+                    <li th:each="user : ${users}" th:if="${user.username != myUsername}">
+                        <a th:href="@{/chat(username=${user.username})}"
+                           th:classappend="${user.username == selectedRecipient} ? 'active bg-blue-50 text-blue-600' : ''"
+                           class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50">
+
+                            <div class="avatar placeholder">
+                                <div class="bg-neutral text-neutral-content rounded-full w-8">
+                                    <span th:text="${#strings.substring(user.username,0,1).toUpperCase()}">U</span>
+                                </div>
+                            </div>
+                            <span th:text="${user.username}" class="font-medium">User Name</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="flex-grow bg-white rounded-lg shadow-md border border-gray-200 flex flex-col h-[calc(100vh-8rem)]">
+
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between bg-white rounded-t-lg z-10">
+                <div class="flex items-center gap-3">
+                    <div th:if="${selectedRecipient != null}" class="avatar">
+                        <div class="w-10 rounded-full">
+                            <img th:src="@{'https://ui-avatars.com/api/?name=' + ${selectedRecipient} + '&background=random&color=fff'}" />
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-gray-800"
+                            th:text="${selectedRecipient != null} ? ${selectedRecipient} : 'Select a contact'">
+                            Select a contact
+                        </h2>
+                        <span th:if="${selectedRecipient != null}" class="text-xs text-green-500 flex items-center gap-1">
+                            <span class="w-2 h-2 bg-green-500 rounded-full"></span> Online
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <input type="hidden" id="currentUsername" th:value="${myUsername}" />
+            <input type="hidden" id="currentRecipient" th:value="${selectedRecipient}" />
+
+            <div id="messageArea" class="flex-grow overflow-y-auto p-6 space-y-4 bg-gray-50">
+
+                <div th:if="${selectedRecipient == null}" class="flex flex-col items-center justify-center h-full text-gray-400">
+                    <i data-lucide="message-square" class="w-16 h-16 mb-4 opacity-50"></i>
+                    <p>Select a user from the left to start chatting.</p>
+                </div>
+
+                <div th:each="msg : ${history}"
+                     th:class="${msg.sender.username == myUsername} ? 'chat chat-end' : 'chat chat-start'">
+
+                    <div class="chat-header text-xs opacity-50 mb-1"
+                         th:text="${msg.sender.username == myUsername} ? 'You' : ${msg.sender.username}">
+                        Sender
+                    </div>
+
+                    <div class="chat-bubble"
+                         th:classappend="${msg.sender.username == myUsername} ? 'chat-bubble-primary' : 'chat-bubble-secondary bg-gray-200 text-gray-800'"
+                         th:text="${msg.content}">
+                        Message Content
+                    </div>
+
+                    <div class="chat-footer opacity-50 text-[10px] mt-1">
+                        <span th:text="${#temporals.format(msg.timestamp, 'HH:mm')}">12:45</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div th:if="${selectedRecipient != null}" class="p-4 border-t border-gray-100 bg-white rounded-b-lg">
+                <form onsubmit="sendMessage(event)" class="flex gap-2 items-center">
+                    <input type="text"
+                           id="messageInput"
+                           class="input input-bordered w-full rounded-full bg-gray-100 focus:bg-white transition-colors"
+                           placeholder="Type a message..."
+                           autocomplete="off" />
+
+                    <button type="submit" class="btn btn-primary btn-circle">
+                        <i data-lucide="send" class="w-5 h-5 ml-0.5"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script th:inline="javascript">
+    var stompClient = null;
+    var currentUser = document.getElementById('currentUsername').value;
+    var currentRecipient = document.getElementById('currentRecipient').value;
+    var messageArea = document.getElementById('messageArea');
+
+function connect() {
+        var socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+
+        // OPTIONAL: Keep this enabled while debugging!
+        // It will show you in the browser console if the message arrives.
+        stompClient.debug = function(str) {
+            console.log(str);
+        };
+
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+
+            stompClient.subscribe('/user/queue/messages', function (messageOutput) {
+                var msg = JSON.parse(messageOutput.body);
+                handleIncomingMessage(msg);
+            });
+        }, function(error) {
+            console.error("WebSocket error:", error);
+        });
+    }
+
+ function handleIncomingMessage(msg) {
+  console.log("Raw Message Received:", msg);
+
+    // 2. SAFE EXTRACTION: Handle potential nulls and case sensitivity
+    // The DTO sends 'senderName', but previous code used 'sender.username'
+    // We try both to be safe.
+    var rawSender = msg.senderName || (msg.sender ? msg.sender.username : "") || "";
+    var rawRecipient = msg.recipientName || (msg.recipient ? msg.recipient.username : "") || "";
+
+    var senderLower = rawSender.toLowerCase();
+    var recipientLower = rawRecipient.toLowerCase();
+
+    // 3. GET CURRENT PAGE STATE (Force lowercase)
+    var currentUserInput = document.getElementById('currentUsername').value;
+    var currentRecipientInput = document.getElementById('currentRecipient').value;
+
+    var meLower = (currentUserInput || "").toLowerCase();
+    var chatPartnerLower = (currentRecipientInput || "").toLowerCase();
+
+    console.log(`Logic Check: Sender[${senderLower}] vs Partner[${chatPartnerLower}] OR (Sender[${senderLower}]==Me[${meLower}] & Recip[${recipientLower}]==Partner[${chatPartnerLower}])`);
+
+    // 4. THE FILTER LOGIC
+    // Condition A: The message is FROM the person I am currently looking at.
+    var isIncomingFromCurrentChat = (senderLower === chatPartnerLower);
+
+    // Condition B: I sent the message (Echo) TO the person I am currently looking at.
+    var isMyEchoToCurrentChat = (senderLower === meLower && recipientLower === chatPartnerLower);
+
+    if (isIncomingFromCurrentChat || isMyEchoToCurrentChat) {
+        console.log("✅ Rendering message bubble");
+        renderMessageBubble(msg, rawSender); // Pass raw name for display (looks nicer)
+        scrollToBottom();
+    } else {
+        console.log("🚫 Message ignored. It belongs to a different conversation.");
+        // Optional: Add a UI notification badge here for other chats
+    }
+}
+
+    function renderMessageBubble(msg, senderName) {
+        var currentUserInput = document.getElementById('currentUsername').value;
+        var meLower = (currentUserInput || "").toLowerCase();
+        var senderLower = (senderName || "").toLowerCase();
+
+        // Compare lowercase to lowercase
+        var isMe = (senderLower === meLower);
+
+        var chatDiv = document.createElement('div');
+        chatDiv.className = isMe ? 'chat chat-end' : 'chat chat-start';
+
+        var headerDiv = document.createElement('div');
+        headerDiv.className = 'chat-header text-xs opacity-50 mb-1';
+        headerDiv.innerText = isMe ? 'You' : senderName; // Display the name nicely
+
+        var bubbleDiv = document.createElement('div');
+        bubbleDiv.className = isMe ? 'chat-bubble chat-bubble-primary' : 'chat-bubble chat-bubble-secondary bg-gray-200 text-gray-800';
+        bubbleDiv.innerText = msg.content;
+
+        var footerDiv = document.createElement('div');
+        footerDiv.className = 'chat-footer opacity-50 text-[10px] mt-1';
+        // If msg.timestamp is a string like "12:00", use it. Otherwise say "Just now"
+        footerDiv.innerText = msg.timestamp ? msg.timestamp.substring(11, 16) : 'Just now';
+
+        chatDiv.appendChild(headerDiv);
+        chatDiv.appendChild(bubbleDiv);
+        chatDiv.appendChild(footerDiv);
+
+        messageArea.appendChild(chatDiv);
+    }
+
+    function sendMessage(event) {
+        event.preventDefault(); // STOP PAGE REFRESH
+
+        var contentInput = document.getElementById('messageInput');
+        var content = contentInput.value.trim();
+
+        if (content && currentRecipient && stompClient) {
+            // Match the DTO in Java: record ChatMessageDTO(String content, String recipientUsername)
+            var payload = {
+                content: content,
+                recipientUsername: currentRecipient
+            };
+
+            stompClient.send("/app/private-message", {}, JSON.stringify(payload));
+            contentInput.value = '';
+        }
+    }
+
+    function scrollToBottom() {
+        if(messageArea) {
+            messageArea.scrollTop = messageArea.scrollHeight;
+        }
+    }
+
+    // Initialize
+    lucide.createIcons();
+    connect();
+    scrollToBottom();
+</script>
+
+</body>
+</html>
