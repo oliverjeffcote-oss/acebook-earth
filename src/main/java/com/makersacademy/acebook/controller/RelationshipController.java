@@ -138,7 +138,7 @@ public class RelationshipController {
             relationshipRepository.save(relationship);
         }
 
-        return new RedirectView("/users/" + requesterId);
+        return new RedirectView("/users/" + receiver.getId() + "/requests/pending");
     }
 
     @PostMapping("/users/{id}/requests/reject")
@@ -163,7 +163,7 @@ public class RelationshipController {
             relationshipRepository.delete(relationship);
         }
 
-        return new RedirectView("/users/" + requesterId);
+        return new RedirectView("/users/" + receiver.getId() + "/requests/pending");
     }
 }
 
