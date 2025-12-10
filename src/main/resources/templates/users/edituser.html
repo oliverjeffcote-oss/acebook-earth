@@ -1,134 +1,140 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
-<head lang="en">
-    <meta charset="UTF-8"/>
-    <title th:text="Edit + ${user.username} + '’s Acebook Profile'">Acebook Profile</title>
-    <link rel="stylesheet" href="/main.css" />
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Edit ' + ${user.username} + '’s Profile'">Edit Profile</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.2/dist/full.min.css" rel="stylesheet" type="text/css" />
-    <!-- lucide icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<!--<body>-->
-<!--<h2>-->
-<!--    Edit <span th:text="${user.username}">Username</span>’s profile page-->
-<!--</h2>-->
+<body class="bg-gray-100 flex flex-col min-h-screen">
 
-<!--<!DOCTYPE html>-->
-<!--<html xmlns:th="http://www.thymeleaf.org"-->
-<!--      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">-->
-<!--<head lang="en">-->
-<!--    <meta charset="UTF-8"/>-->
-<!--    <title th:text="${user.username} + ''s Profile – Edit'">Edit Profile</title>-->
-<!--    <link rel="stylesheet" href="/main.css" />-->
-<!--</head>-->
-<body class="bg-gray-100 min-h-screen flex flex-col" data-theme="light">
 <th:block th:replace="fragments/layout :: navbar"></th:block>
-<main class="bg-gray-100 flex-grow flex justify-center items-start pt-8 pb-8">
-<h2>Edit your Acebook profile</h2>
 
-<p>
-    Signed in as
-    <span th:text="${user.username}">Username</span>
-</p>
+<main class="flex-grow flex justify-center items-start pt-8 pb-8 px-4">
+    <div class="w-full max-w-2xl">
 
-<hr/>
+        <div class="card w-full bg-white border border-gray-200 rounded-xl shadow-lg overflow-visible">
 
-<form th:action="@{/users/edit}" th:object="${user}"
-      method="post" enctype="multipart/form-data">
+            <div class="relative">
+                <div class="h-32 bg-gradient-to-r from-blue-500 to-sky-400 rounded-t-xl"></div>
 
-    <!-- CSRF token (uncomment if you're using CSRF protection) -->
-    <!--
-    <input type="hidden"
-           th:if="${_csrf != null}"
-           th:name="${_csrf.parameterName}"
-           th:value="${_csrf.token}" />
-    -->
+                <div class="absolute -bottom-12 left-6">
+                    <div class="avatar">
+                        <div class="w-24 h-24 rounded-full border-4 border-white bg-gray-300 overflow-hidden">
+                            <img th:if="${user.imagePath != null}" th:src="${user.imagePath}" class="object-cover w-full h-full"/>
 
-    <!-- Current photo preview -->
-    <div style="margin-bottom: 1rem;">
-        <label><strong>Current photo:</strong></label><br/>
-        <span th:if="${user.imagePath != null}">
-            <img th:src="${user.imagePath}"
-                 alt="Current profile photo"
-                 style="max-width: 200px; max-height: 200px; display:block; margin-top:0.5rem;" />
-        </span>
-        <span th:if="${user.imagePath == null}">
-            No photo uploaded yet
-        </span>
+                            <img th:if="${user.imagePath == null}"
+                                 th:src="'https://placehold.co/96x96/4c6ef5/ffffff?text=' + ${#strings.toUpperCase(user.username.length() > 1 ? #strings.substring(user.username,0,2) : user.username)}"
+                                 alt="Profile" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body p-6 pt-16">
+
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">Edit Profile</h2>
+                    <p class="text-sm text-gray-500 mt-2">Update your personal details and photo.</p>
+                </div>
+
+                <form th:action="@{/users/edit}" th:object="${user}"
+                      method="post" enctype="multipart/form-data" class="space-y-6">
+
+                    <div class="form-control w-full">
+                        <label class="label" for="image">
+                                <span class="label-text font-semibold flex items-center">
+                                    <i data-lucide="camera" class="w-4 h-4 mr-2"></i>Change Photo
+                                </span>
+                        </label>
+                        <input id="image" type="file" name="image" accept="image/*"
+                               class="file-input file-input-bordered file-input-primary w-full" />
+                        <label class="label">
+                            <span class="label-text-alt text-gray-500">Upload a new image to replace the current one.</span>
+                        </label>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="form-control">
+                        <label class="label" for="description">
+                            <span class="label-text font-semibold">About Me</span>
+                        </label>
+                        <textarea id="description" th:field="*{description}"
+                                  class="textarea textarea-bordered h-24 text-base"
+                                  placeholder="Tell people a bit about yourself..."></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                        <div class="form-control w-full">
+                            <label class="label" for="birthday">
+                                    <span class="label-text font-semibold flex items-center">
+                                        <i data-lucide="cake" class="w-4 h-4 mr-2 text-purple-500"></i>Birthday
+                                    </span>
+                            </label>
+                            <input id="birthday" type="date" th:field="*{birthday}" class="input input-bordered w-full" />
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label class="label" for="location">
+                                    <span class="label-text font-semibold flex items-center">
+                                        <i data-lucide="map-pin" class="w-4 h-4 mr-2 text-red-500"></i>Location
+                                    </span>
+                            </label>
+                            <input id="location" type="text" th:field="*{location}" placeholder="e.g. London, UK" class="input input-bordered w-full" />
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label class="label" for="education">
+                                    <span class="label-text font-semibold flex items-center">
+                                        <i data-lucide="graduation-cap" class="w-4 h-4 mr-2 text-blue-500"></i>Education
+                                    </span>
+                            </label>
+                            <input id="education" type="text" th:field="*{education}" placeholder="e.g. University name" class="input input-bordered w-full" />
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label class="label" for="employment">
+                                    <span class="label-text font-semibold flex items-center">
+                                        <i data-lucide="briefcase" class="w-4 h-4 mr-2 text-orange-500"></i>Where I Work
+                                    </span>
+                            </label>
+                            <input id="employment" type="text" th:field="*{employment}" placeholder="e.g. Software Engineer at..." class="input input-bordered w-full" />
+                        </div>
+
+                        <div class="form-control w-full md:col-span-2">
+                            <label class="label" for="birthplace">
+                                    <span class="label-text font-semibold flex items-center">
+                                        <i data-lucide="globe" class="w-4 h-4 mr-2 text-teal-500"></i>Where I'm From
+                                    </span>
+                            </label>
+                            <input id="birthplace" type="text" th:field="*{birthplace}" placeholder="e.g. Glasgow, Scotland" class="input input-bordered w-full" />
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-4 mt-8">
+                        <a th:href="@{/users/profile}" class="btn btn-ghost">Cancel</a>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i data-lucide="save" class="w-4 h-4 mr-2"></i>
+                            Save Changes
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
     </div>
-
-    <!-- Upload new photo -->
-    <div style="margin-bottom: 1rem;">
-        <label for="image"><strong>Upload new photo (optional):</strong></label><br/>
-        <input id="image" type="file" name="image" accept="image/*"/>
-        <p style="font-size: 0.9rem; color: #666; margin-top: 0.25rem;">
-            If you choose a new photo, it will replace the current one.
-        </p>
-    </div>
-
-    <!-- About Me -->
-    <div style="margin-bottom: 1rem;">
-        <label for="description"><strong>About Me:</strong></label><br/>
-        <textarea id="description"
-                  th:field="*{description}"
-                  rows="4"
-                  cols="50"
-                  placeholder="Tell people a bit about yourself"></textarea>
-    </div>
-
-    <!-- Birthday -->
-    <div style="margin-bottom: 1rem;">
-        <label for="birthday"><strong>Birthday:</strong></label><br/>
-        <input id="birthday"
-               type="date"
-               th:field="*{birthday}" />
-    </div>
-
-    <!-- Location -->
-    <div style="margin-bottom: 1rem;">
-        <label for="location"><strong>Location:</strong></label><br/>
-        <input id="location"
-               type="text"
-               th:field="*{location}"
-               placeholder="e.g. London, UK" />
-    </div>
-
-    <!-- Education -->
-    <div style="margin-bottom: 1rem;">
-        <label for="education"><strong>Education:</strong></label><br/>
-        <input id="education"
-               type="text"
-               th:field="*{education}"
-               placeholder="e.g. Makers Academy, University..." />
-    </div>
-
-    <!-- Where I'm From -->
-    <div style="margin-bottom: 1rem;">
-        <label for="birthplace"><strong>Where I'm From:</strong></label><br/>
-        <input id="birthplace"
-               type="text"
-               th:field="*{birthplace}"
-               placeholder="e.g. Glasgow, Scotland" />
-    </div>
-
-    <!-- Where I Work -->
-    <div style="margin-bottom: 1rem;">
-        <label for="employment"><strong>Where I Work:</strong></label><br/>
-        <input id="employment"
-               type="text"
-               th:field="*{employment}"
-               placeholder="e.g. Junior Developer at..." />
-    </div>
-
-    <hr/>
-
-    <div style="margin-top: 1rem;">
-        <button type="submit" class="btn btn-primary">💾 Save changes</button>
-        <a th:href="@{/users/profile}" class="btn" style="margin-left: 0.5rem;">Cancel</a>
-    </div>
-</form>
 </main>
+
+<script>
+    lucide.createIcons();
+</script>
 </body>
 </html>
