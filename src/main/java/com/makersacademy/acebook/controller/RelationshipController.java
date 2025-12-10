@@ -167,5 +167,27 @@ public class RelationshipController {
 
         return new RedirectView("/users/requests/pending");
     }
+
+    @PostMapping("/users/{id}/remove")
+    public RedirectView removeFriend(@PathVariable("id") Long profileUserId, @AuthenticationPrincipal DefaultOidcUser principal) {
+
+        String auth0Username = principal.getAttribute("https://myapp.com/username");
+
+        User user = userRepository.findUserByUsername(auth0Username)
+                .orElseThrow();
+        User profileUser = userRepository.findById(profileUserId)
+                .orElseThrow(() -> new RuntimeException("Profile user not found"));
+
+        Relationship relationship = relationshipRepository.findByRequesterAndReceiver(user, profileUser)
+                .orElseGet(() -> relationshipRepository.findByRequesterAndReceiver(profileUser, user)
+                        .orElseThrow(() -> new RuntimeException("Friendship not found")));
+
+        if (relationship.getStatus() == Status.ACCEPTED) {
+            relationshipRepository.delete(relationship);
+        }
+
+        return new RedirectView("/users/" + profileUserId);
+    }
+
 }
 

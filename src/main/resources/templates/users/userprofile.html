@@ -106,8 +106,10 @@
                                         </div>
                                     </span>
 
-                                <span th:case="'ACCEPTED'">
-                                        <button class="btn btn-outline btn-success btn-sm rounded-full">Friends</button>
+                                    <span th:case="'ACCEPTED'">
+                                        <form th:action="@{'/users/' + ${user.id} + '/remove'}" method="post">
+                                            <button type="submit" class="btn btn-error btn-sm text-white rounded-full">Remove Friend</button>
+                                        </form>
                                     </span>
                             </div>
                         </div>
