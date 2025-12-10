@@ -5,9 +5,14 @@
     <meta charset="UTF-8"/>
     <title th:text="${user.username} + '’s Acebook Profile'">Acebook Profile</title>
     <link rel="stylesheet" href="/main.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <!-- lucide icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body>
-
+<body class="bg-gray-100 min-h-screen flex flex-col" data-theme="light">
+<th:block th:replace="fragments/layout :: navbar"></th:block>
+<main class="bg-gray-100 flex-grow flex justify-center items-start pt-8 pb-8">
 <h2>This is <span th:text="${user.username}">Username</span>’s profile page</h2>
 
 <div th:if="${relationship == null and loggedInUser.id != user.id}">
@@ -103,6 +108,6 @@
     </tr>
     </tbody>
 </table>
-
+</main>
 </body>
 </html>

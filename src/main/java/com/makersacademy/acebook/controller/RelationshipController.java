@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 
 import java.util.List;
 
@@ -27,28 +29,28 @@ public class RelationshipController {
     @Autowired
     private UserRepository userRepository;
 
-    @GetMapping("/users/{id}/requests/pending")
-    public ModelAndView userRequests(@PathVariable("id") Long userId) {
-        DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getPrincipal();
+    @GetMapping("/users/requests/pending") // Note the simplified URL
+    public ModelAndView userRequests(@AuthenticationPrincipal DefaultOidcUser principal) {
 
+        // 1. Get the username from the principal's attributes
         String auth0Username = principal.getAttribute("https://myapp.com/username");
 
+        // 2. Load the User entity from the database using the username
+        // The current user is guaranteed to be logged in, so orElseThrow() is safe.
         User user = userRepository.findUserByUsername(auth0Username).orElseThrow();
 
-        if (!user.getId().equals(userId)) {
-            return new ModelAndView("/posts");
-        }
+        // The authorization check (if (!user.getId().equals(userId))) is now unnecessary,
+        // as we are only acting on the user we just retrieved from the security context.
 
+        // 3. Retrieve the pending requests
         List<Relationship> pendingRequests = relationshipRepository.findPendingRequests(user, Status.PENDING);
         List<User> requesters = pendingRequests.stream().map(Relationship::getRequester).toList();
 
         ModelAndView modelAndView = new ModelAndView("/users/requests");
 
-        modelAndView.addObject("requesters", requesters); // to see person requesting
-        modelAndView.addObject("pendingRequests", pendingRequests); // so we can have accept/reject buttons
+        // Add data to the model
+        modelAndView.addObject("requesters", requesters);
+        modelAndView.addObject("pendingRequests", pendingRequests);
         modelAndView.addObject("user", user);
 
         return modelAndView;
@@ -138,7 +140,7 @@ public class RelationshipController {
             relationshipRepository.save(relationship);
         }
 
-        return new RedirectView("/users/" + receiver.getId() + "/requests/pending");
+        return new RedirectView("/users/requests/pending");
     }
 
     @PostMapping("/users/{id}/requests/reject")
@@ -163,7 +165,7 @@ public class RelationshipController {
             relationshipRepository.delete(relationship);
         }
 
-        return new RedirectView("/users/" + receiver.getId() + "/requests/pending");
+        return new RedirectView("/users/requests/pending");
     }
 }
 
