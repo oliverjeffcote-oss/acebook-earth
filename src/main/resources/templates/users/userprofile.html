@@ -85,10 +85,16 @@
 <hr/>
 
 <!-- ✏️ Edit profile button (your version) -->
-<form th:action="@{/users/edit}" method="get">
+<div style="display: flex; gap: 10px;"><form th:action="@{/users/edit}" method="get">
     <button type="submit" class="btn btn-primary">✏️ Edit</button>
 </form>
 
+<!-- Back to posts button -->
+<form th:action="@{/}" method="get">
+    <button type="submit" class="btn btn-primary">↩️ Back to Posts</button>
+</form>
+
+</div>
 <hr/>
 
 <!-- 🧪 Debug/info table (incoming version) -->
