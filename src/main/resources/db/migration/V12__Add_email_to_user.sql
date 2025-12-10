@@ -1,0 +1,1 @@
+ALTER TABLE users ADD COLUMN email_address VARCHAR(255) NOT NULL;

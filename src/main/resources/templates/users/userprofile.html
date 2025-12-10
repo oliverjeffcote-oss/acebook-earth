@@ -7,12 +7,54 @@
     <link rel="stylesheet" href="/main.css" />
 </head>
 <body>
-<h2>
-    This is <span th:text="${user.username}">Username</span>’s profile page
-</h2>
 
-<br>
+<h2>This is <span th:text="${user.username}">Username</span>’s profile page</h2>
 
+<!-- 🔗 Friendship controls (incoming changes) -->
+<div th:if="${relationship == null and loggedInUser.id != user.id}">
+    <form th:action="@{'/users/' + ${user.id} + '/requests/add'}"
+          method="post"
+          style="display:inline; margin-left: 0.5rem;">
+        <button type="submit">Add Friend</button>
+    </form>
+</div>
+
+<div th:if="${relationship != null}" th:switch="${relationship?.status?.name() ?: ''}">
+
+    <span th:case="'PENDING'">
+
+        <span th:if="${relationship.receiver.id == loggedInUser.id}">
+            <form th:action="@{'/users/' + ${relationship.requester.id} + '/requests/accept'}"
+                  method="post"
+                  style="display:inline; margin-left: 0.5rem;">
+                <button type="submit">Accept Friend Request</button>
+            </form>
+
+            <form th:action="@{'/users/' + ${relationship.requester.id} + '/requests/reject'}"
+                  method="post"
+                  style="display:inline; margin-left: 0.5rem;">
+                <button type="submit">Reject Friend Request</button>
+            </form>
+        </span>
+
+        <span th:if="${relationship.requester.id == loggedInUser.id}">
+            <button style="display:inline; margin-left: 0.5rem;" disabled>Pending Acceptance</button>
+        </span>
+
+    </span>
+
+    <span th:case="'ACCEPTED'">
+        <button style="display:inline; margin-left: 0.5rem;" disabled>Already Friends</button>
+    </span>
+
+    <span th:case="*">
+        <!-- No special status -->
+    </span>
+</div>
+
+<br/>
+
+<!-- 💁 Your richer profile info (your version) -->
 <ul>
     <li>
         <span>Photo:</span>
@@ -35,9 +77,30 @@
 
 <hr/>
 
+<!-- ✏️ Edit profile button (your version) -->
 <form th:action="@{/user/edit}" method="get">
-    <button type="submit" class="btn btn-primary">✏️ Edit </button>
+    <button type="submit" class="btn btn-primary">✏️ Edit</button>
 </form>
+
+<hr/>
+
+<!-- 🧪 Debug/info table (incoming version) -->
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Active?</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td th:text="${user.id}"></td>
+        <td th:text="${user.username}"></td>
+        <td th:text="${user.enabled}"></td>
+    </tr>
+    </tbody>
+</table>
 
 </body>
 </html>

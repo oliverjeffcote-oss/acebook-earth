@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 public class PostTest {
     @Test
         public void postHasContentAndUserId() {
-        User user = new User("Claire");
+        User user = new User("Claire", "Test@Testemail.com");
         user.setId(1L);
 
         Post post = new Post("hello", user);
@@ -19,7 +19,7 @@ public class PostTest {
         }
     @Test
         public void postCanStoreImagePath() {
-            User user = new User("David");
+            User user = new User("David", "Test@email");
             Post post = new Post("hello", user);
 
             post.setImagePath("/uploads/test-image.jpg");
