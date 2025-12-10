@@ -65,6 +65,10 @@
 
         <h1 class="text-2xl font-bold text-gray-800 mb-4 text-center">Pending Friend Requests</h1>
 
+        <div th:if="${#lists.isEmpty(requesters)}" class="flex justify-center items-center py-10">
+            <p class="text-gray-400 text-lg font-medium">No pending friend requests</p>
+        </div>
+
         <div th:each="requester : ${requesters}"
              class="card w-full bg-white border border-gray-200 rounded-lg shadow-md p-4 flex flex-row items-center justify-between">
 
