@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +29,27 @@ public class User {
 
     @Column(name = "enabled")
     private boolean enabled;
+
+    @Column(name = "image_path")
+    private String imagePath;
+
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "birthday")
+    private LocalDate birthday;
+
+    @Column(name = "location")
+    private String location;
+
+    @Column(name = "education")
+    private String education;
+
+    @Column(name = "birthplace")
+    private String birthplace;
+
+    @Column(name = "employment")
+    private String employment;
 
     @OneToMany(mappedBy = "user")
     private List<Post> posts;

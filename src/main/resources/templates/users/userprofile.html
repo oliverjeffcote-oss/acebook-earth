@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5" >
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
 <head lang="en">
     <meta charset="UTF-8"/>
-    <title th:text="${user.username}">'s Acebook Profile</title>
+    <title th:text="${user.username} + '’s Acebook Profile'">Acebook Profile</title>
     <link rel="stylesheet" href="/main.css" />
 </head>
 <body>
-<h2>This is <span th:text="${user.username}"></span>'s profile page</h2>
+
+<h2>This is <span th:text="${user.username}">Username</span>’s profile page</h2>
 
 <div th:if="${relationship == null and loggedInUser.id != user.id}">
     <form th:action="@{'/users/' + ${user.id} + '/requests/add'}"
@@ -17,26 +18,28 @@
     </form>
 </div>
 
-<div th:if="${relationship != null}" th:switch="${relationship?.status?.name() ?: ''}">
+<!-- 🔗 Friendship controls (incoming changes)-->
+<div th:if="${relationship != null}"
+     th:switch="${relationship.status.name()}">
 
     <span th:case="'PENDING'">
 
         <span th:if="${relationship.receiver.id == loggedInUser.id}">
-                <form th:action="@{'/users/' + ${relationship.requester.id} + '/requests/accept'}"
-                      method="post"
-                      style="display:inline; margin-left: 0.5rem;">
-                    <button type="submit">Accept Friend Request</button>
-                </form>
+            <form th:action="@{'/users/' + ${relationship.requester.id} + '/requests/accept'}"
+                  method="post"
+                  style="display:inline; margin-left: 0.5rem;">
+                <button type="submit">Accept Friend Request</button>
+            </form>
 
-                <form th:action="@{'/users/' + ${relationship.requester.id} + '/requests/reject'}"
-                      method="post"
-                      style="display:inline; margin-left: 0.5rem;">
-                    <button type="submit">Reject Friend Request</button>
-                </form>
+            <form th:action="@{'/users/' + ${relationship.requester.id} + '/requests/reject'}"
+                  method="post"
+                  style="display:inline; margin-left: 0.5rem;">
+                <button type="submit">Reject Friend Request</button>
+            </form>
         </span>
 
         <span th:if="${relationship.requester.id == loggedInUser.id}">
-            <button style="display:inline; margin-left: 0.5rem;" disabled> Pending Acceptance</button>
+            <button style="display:inline; margin-left: 0.5rem;" disabled>Pending Acceptance</button>
         </span>
 
     </span>
@@ -46,9 +49,44 @@
     </span>
 
     <span th:case="*">
-        </span>
+        <!-- No special status -->
+    </span>
 </div>
 
+
+<br/>
+
+<!-- 💁 Your richer profile info (your version) -->
+<ul>
+    <li>
+        <span>Photo:</span>
+        <span th:if="${user.imagePath != null}">
+            <img th:src="${user.imagePath}"
+                 alt="Profile photo"
+                 style="max-width: 200px; max-height: 200px;" />
+        </span>
+        <span th:if="${user.imagePath == null}">
+            No photo yet
+        </span>
+    </li>
+    <li><strong>About Me:</strong> <span th:text="${user.description}">About Me</span></li>
+    <li><strong>Birthday:</strong> <span th:text="${user.birthday}">Birthday</span></li>
+    <li><strong>Location:</strong> <span th:text="${user.location}">Location</span></li>
+    <li><strong>Education:</strong> <span th:text="${user.education}">Education</span></li>
+    <li><strong>Where I'm From:</strong> <span th:text="${user.birthplace}">Where I'm From</span></li>
+    <li><strong>Where I Work:</strong> <span th:text="${user.employment}">Where I Work</span></li>
+</ul>
+
+<hr/>
+
+<!-- ✏️ Edit profile button (your version) -->
+<form th:action="@{/users/edit}" method="get">
+    <button type="submit" class="btn btn-primary">✏️ Edit</button>
+</form>
+
+<hr/>
+
+<!-- 🧪 Debug/info table (incoming version) -->
 <table>
     <thead>
     <tr>
