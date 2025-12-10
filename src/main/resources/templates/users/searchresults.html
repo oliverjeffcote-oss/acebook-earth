@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5" lang="">
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
+      lang="en">
 <head lang="en">
     <meta charset="UTF-8" />
     <title th:text="|Search results for '${query}' - Acebook|">
@@ -8,53 +9,77 @@
     </title>
     <link rel="stylesheet" href="/main.css" />
 </head>
-<body>
+<body class="bg-gray-100" data-theme="light">
 
-<h2 th:text="|Search results for '${query}'|">
-    Search results
-</h2>
+<div class="max-w-4xl mx-auto mt-6 px-4 space-y-4">
 
-<form th:action="@{/user/search}" method="get" style="margin-bottom: 1rem;">
-    <label>
-        <input type="text"
-                name="query"
-                th:value="${query}"
-                placeholder="Search user..."
-                />
-    </label>
-    <button type="submit">Search</button>
-</form>
+    <!-- Header + cancel -->
+    <div class="flex items-center justify-between gap-4">
+        <h2 class="text-xl font-semibold"
+            th:text="|Search results for '${query}'|">
+            Search results
+        </h2>
 
-<div th:if="${#lists.isEmpty(results)}">
-    <p>No users found.</p>
-</div>
+        <a th:href="@{/posts}"
+           class="btn btn-ghost btn-sm rounded-full border border-gray-200">
+            Cancel search
+        </a>
+    </div>
 
-<div th:if="${!#lists.isEmpty(results)}">
-    <p th:text="${#lists.size(results)} + ' user(s) found.'">Users found.</p>
+    <!-- No results -->
+    <div th:if="${#lists.isEmpty(results)}"
+         class="mt-4 text-center text-gray-500 space-y-3">
 
-    <ul>
-        <li th:each="u : ${results}">
-            <!-- Profile image thumbnail if available -->
-            <span th:if="${u.imagePath != null}">
-                <img th:src="${u.imagePath}"
-                alt="Profile photo"
-                style="width: 40px; height:40px; object-fit:cover; border-radius:50%; margin-right:0.5rem;" />
-            </span>
+        <p class="text-lg font-semibold">
+            No users found for "<span th:text="${query}">query</span>".
+        </p>
 
-            <!-- Username linked to their profile -->
-            <a th:href="@{/users/{id}(id=${u.id})}"
-                th:text="${u.username}">
-                Username
+        <p class="text-sm">
+            Try another search term or go back to your feed.
+        </p>
+
+        <div class="flex justify-center gap-3 mt-2">
+            <a th:href="@{/posts}"
+               class="btn btn-outline btn-sm rounded-full">
+                Cancel search &amp; go back to posts
             </a>
+        </div>
+    </div>
 
-            <!-- Optional: short description preview -->
-            <span th:if="${u.description !=null and !#strings.isEmpty(u.description)}"
-                    class="text-sm text-gray-700">
-                        <span class="font-semibold">About:</span>
+    <!-- Results list -->
+    <div th:if="${!#lists.isEmpty(results)}" class="mt-4 space-y-3">
+        <p th:text="${#lists.size(results)} + ' user(s) found.'">
+            Users found.
+        </p>
+
+        <ul class="space-y-3">
+            <li th:each="u : ${results}" class="flex items-center gap-3">
+                <!-- Profile image thumbnail if available -->
+                <span th:if="${u.imagePath != null}">
+                    <img th:src="${u.imagePath}"
+                         alt="Profile photo"
+                         style="width: 40px; height:40px; object-fit:cover; border-radius:50%;" />
+                </span>
+
+                <div class="flex flex-col">
+                    <!-- Username linked to their profile -->
+                    <a th:href="@{/users/{id}(id=${u.id})}"
+                       th:text="${u.username}"
+                       class="font-semibold text-blue-700 hover:underline">
+                        Username
+                    </a>
+
+                    <!-- Optional: short description preview -->
+                    <span th:if="${u.description != null and !#strings.isEmpty(u.description)}"
+                          class="text-sm text-gray-700">
+                        <span class="font-semibold">About: </span>
                         <span th:text="${u.description}">User bio</span>
-            </span>
-        </li>
-    </ul>
+                    </span>
+                </div>
+            </li>
+        </ul>
+    </div>
+
 </div>
 
 </body>
