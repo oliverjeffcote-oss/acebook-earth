@@ -18,12 +18,18 @@
 
                 <a href="/posts" class="btn btn-ghost text-2xl font-extrabold text-blue-600 mr-4">AceBook</a>
 
-                <div class="hidden lg:flex">
+                <!-- Desktop search form -->
+                <form th:action="@{/users/search}"
+                      method="get"
+                      class="hidden lg:flex">
                     <label class="input input-sm input-bordered flex items-center gap-2 rounded-full navbar-search-input">
                         <i data-lucide="search" class="w-4 h-4 text-gray-500"></i>
-                        <input type="text" class="grow placeholder-gray-500 bg-transparent" placeholder="Search AceBook"/>
+                        <input type="text"
+                               name="query"
+                               class="grow placeholder-gray-500 bg-transparent"
+                               placeholder="Search AceBook" />
                     </label>
-                </div>
+                </form>
             </div>
 
             <div class="navbar-center flex flex-grow justify-center lg:flex-none"></div>
@@ -31,18 +37,19 @@
             <!-- user actions -->
             <div class="navbar-end space-x-2">
 
-                <!-- mobile search -->
+                <!-- mobile search (icon only for now) -->
                 <button class="btn btn-ghost btn-circle lg:hidden">
                     <i data-lucide="search" class="w-5 h-5"></i>
                 </button>
 
                 <span class="hidden md:inline-block text-sm text-gray-500 mr-2">
-                    Hi, <span sec:authentication="principal.attributes['currentUser']" th:text="${#authentication.principal.attributes['preferred_username']}">User</span>
+                    Hi, <span sec:authentication="principal.attributes['currentUser']"
+                              th:text="${#authentication.principal.attributes['preferred_username']}">User</span>
                 </span>
+
                 <!-- avatar dropdown -->
                 <div class="dropdown dropdown-end">
                     <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
-
                         <div class="w-10 rounded-full ring ring-gray-300">
                             <img src="https://placehold.co/40x40/374151/ffffff?text=Me" alt="User Avatar"/>
                         </div>
@@ -65,18 +72,25 @@
             <div class="navbar-start">
                 <a href="/posts" class="btn btn-ghost text-2xl font-extrabold text-blue-600 mr-4">AceBook</a>
 
-                <div class="hidden lg:flex">
+                <!-- Desktop search form for anonymous users -->
+                <form th:action="@{/users/search}"
+                      method="get"
+                      class="hidden lg:flex">
                     <label class="input input-sm input-bordered flex items-center gap-2 rounded-full navbar-search-input">
                         <i data-lucide="search" class="w-4 h-4 text-gray-500"></i>
-                        <input type="text" class="grow placeholder-gray-500 bg-transparent" placeholder="Search AceBook"/>
+                        <input type="text"
+                               name="query"
+                               class="grow placeholder-gray-500 bg-transparent"
+                               placeholder="Search AceBook" />
                     </label>
-                </div>
+                </form>
             </div>
 
             <div class="navbar-center flex flex-grow justify-center lg:flex-none"></div>
 
             <div class="navbar-end space-x-2">
 
+                <!-- mobile search (icon only for now) -->
                 <button class="btn btn-ghost btn-circle lg:hidden">
                     <i data-lucide="search" class="w-5 h-5"></i>
                 </button>
