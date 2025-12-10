@@ -10,11 +10,16 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <!-- lucide icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="bg-gray-100 flex flex-col min-h-screen">
 
 <th:block th:replace="fragments/layout :: navbar"></th:block>
+
+<form th:action="@{/}" method="get">
+    <button type="submit" class="btn btn-primary">↩️ Back to Posts</button>
+</form>
 
 <main class="flex-grow flex justify-center items-start pt-8 pb-8 px-4">
     <div class="w-full max-w-2xl">
@@ -45,7 +50,6 @@
             </div>
 
             <div class="card-body p-6 pt-16">
-
                 <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
                     <div>
                         <h2 class="card-title text-2xl font-bold text-gray-900" th:text="${user?.username}">
