@@ -30,7 +30,7 @@
 
 <hr/>
 
-<form th:action="@{/user/edit}" th:object="${user}"
+<form th:action="@{/users/edit}" th:object="${user}"
       method="post" enctype="multipart/form-data">
 
     <!-- CSRF token (uncomment if you're using CSRF protection) -->
@@ -121,7 +121,7 @@
 
     <div style="margin-top: 1rem;">
         <button type="submit" class="btn btn-primary">💾 Save changes</button>
-        <a th:href="@{/user/profile}" class="btn" style="margin-left: 0.5rem;">Cancel</a>
+        <a th:href="@{/users/profile}" class="btn" style="margin-left: 0.5rem;">Cancel</a>
     </div>
 </form>
 

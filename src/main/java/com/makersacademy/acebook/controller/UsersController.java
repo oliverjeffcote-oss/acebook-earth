@@ -1,6 +1,8 @@
 package com.makersacademy.acebook.controller;
 
+import com.makersacademy.acebook.model.Relationship;
 import com.makersacademy.acebook.model.User;
+import com.makersacademy.acebook.repository.RelationshipRepository;
 import com.makersacademy.acebook.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -10,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.view.RedirectView;
 
 import java.io.IOException;
@@ -21,9 +24,16 @@ import java.util.UUID;
 
 @Controller
 public class UsersController {
+
     @Autowired
     UserRepository userRepository;
 
+    @Autowired
+    RelationshipRepository relationshipRepository;
+
+    // ---------------------------------------------------------------------
+    // After login: ensure User exists, then go to posts
+    // ---------------------------------------------------------------------
     @GetMapping("/users/after-login")
     public RedirectView afterLogin() {
         DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
@@ -31,47 +41,94 @@ public class UsersController {
                 .getAuthentication()
                 .getPrincipal();
 
-        String username = (String) principal.getAttributes().get("email");
+        String auth0Username = principal.getAttribute("https://myapp.com/username");
+        String userEmail = principal.getEmail();
+
         userRepository
-                .findUserByUsername(username)
-                .orElseGet(() -> userRepository.save(new User(username)));
+                .findUserByUsername(auth0Username)
+                .orElseGet(() -> userRepository.save(new User(auth0Username, userEmail)));
 
         return new RedirectView("/posts");
     }
 
-    @GetMapping("/user/profile")
-    public String userProfile(Model model) {
+    // ---------------------------------------------------------------------
+    // View SOMEONE ELSE'S profile by id: /users/{id}
+    // ---------------------------------------------------------------------
+    @GetMapping("/users/{id}")
+    public ModelAndView userProfile(@PathVariable("id") Long id) {
+        User user = userRepository.findById(id).orElseThrow(() ->
+                new IllegalArgumentException("Invalid User Id:" + id));
+
         DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
-               .getContext()
-               .getAuthentication()
-               .getPrincipal();
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
 
-        String email = (String) principal.getAttributes().get("email");
+        String auth0Username = principal.getAttribute("https://myapp.com/username");
 
-        User user = userRepository.findUserByUsername(email)
-               .orElseThrow(() -> new RuntimeException("User not found: " + email));
+        User loggedInUser = userRepository.findUserByUsername(auth0Username)
+                .orElseThrow(() -> new RuntimeException("Logged-in user not found: " + auth0Username));
+
+        Relationship relationship = relationshipRepository.findByRequesterAndReceiver(loggedInUser, user)
+                .orElseGet(() -> relationshipRepository
+                        .findByRequesterAndReceiver(user, loggedInUser)
+                        .orElse(null));
+
+        ModelAndView modelAndView = new ModelAndView("users/userprofile");
+        modelAndView.addObject("user", user);           // profile owner
+        modelAndView.addObject("loggedInUser", loggedInUser);
+        modelAndView.addObject("relationship", relationship);
+        return modelAndView;
+    }
+
+    // ---------------------------------------------------------------------
+    // View MY OWN profile: /users/profile
+    // ---------------------------------------------------------------------
+    @GetMapping("/users/profile")
+    public String myProfile(Model model) {
+        DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        String auth0Username = principal.getAttribute("https://myapp.com/username");
+        String userEmail = principal.getEmail();
+
+        User user = userRepository
+                .findUserByUsername(auth0Username)
+                .orElseGet(() -> userRepository.save(new User(auth0Username, userEmail)));
 
         model.addAttribute("user", user);
-        return "users/userprofile"; // your template
-}
+        model.addAttribute("loggedInUser", user);   // you are the logged-in user
+        model.addAttribute("relationship", null);   // no friendship with yourself
+        return "users/userprofile";
+    }
 
-    @GetMapping("/user/edit")
+    // ---------------------------------------------------------------------
+    // Edit profile (form): /users/edit  [GET]
+    // ---------------------------------------------------------------------
+    @GetMapping("/users/edit")
     public String editUserProfileForm(Model model) {
         DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
                 .getContext()
                 .getAuthentication()
                 .getPrincipal();
 
-        String email = (String) principal.getAttributes().get("email");
+        String auth0Username = principal.getAttribute("https://myapp.com/username");
+        String userEmail = principal.getEmail();
 
-        User user = userRepository.findUserByUsername(email)
-                .orElseThrow(() -> new RuntimeException("User not found: " + email));
+        User user = userRepository
+                .findUserByUsername(auth0Username)
+                .orElseGet(() -> userRepository.save(new User(auth0Username, userEmail)));
 
         model.addAttribute("user", user);
-        return "users/edituser"; // your edit template
+        return "users/edituser";
     }
 
-    @PostMapping("/user/edit")
+    // ---------------------------------------------------------------------
+    // Edit profile (submit): /users/edit  [POST]
+    // ---------------------------------------------------------------------
+    @PostMapping("/users/edit")
     public RedirectView updateUserProfile(
             @ModelAttribute("user") User formUser,
             @RequestParam(value = "image", required = false) MultipartFile imageFile
@@ -81,11 +138,13 @@ public class UsersController {
                 .getAuthentication()
                 .getPrincipal();
 
-        String email = (String) principal.getAttributes().get("email");
+        String auth0Username = principal.getAttribute("https://myapp.com/username");
+        String userEmail = principal.getEmail();
 
         // Always load the real user from the DB, don't trust IDs from the form
-        User user = userRepository.findUserByUsername(email)
-                .orElseThrow(() -> new RuntimeException("User not found: " + email));
+        User user = userRepository
+                .findUserByUsername(auth0Username)
+                .orElseGet(() -> userRepository.save(new User(auth0Username, userEmail)));
 
         // Copy editable fields from the form object into the real user
         user.setDescription(formUser.getDescription());
@@ -125,7 +184,6 @@ public class UsersController {
         userRepository.save(user);
 
         // Back to profile page
-        return new RedirectView("/user/profile");
+        return new RedirectView("/users/profile");
     }
-
 }

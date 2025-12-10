@@ -32,7 +32,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/login", "/css/**", "/images/**", "/error").permitAll()
                         // Require login for profile + user
-                        .requestMatchers("/user/**").authenticated()
+                        .requestMatchers("/users/**").authenticated()
                         .requestMatchers("/posts/**").authenticated()
                         .anyRequest().authenticated()
                 )
