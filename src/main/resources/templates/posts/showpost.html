@@ -127,11 +127,13 @@
                 </div>
 
                 <!-- content -->
-                <div class="mb-3">
-                    <p th:text="${post.content}" class="text-sm text-gray-700 leading-normal">
-                        Post Content
-                    </p>
+                <!-- display image post when trying to comment in the new window -->
+                <div th:if="${post.imagePath != null}" class="mb-3">
+                    <img th:src="${post.imagePath}"
+                         alt="Post image"
+                         class="rounded-lg w-full object-cover max-h-96 border border-gray-200" />
                 </div>
+
 
                 <!-- post actions (like and counters) -->
                 <div class="border-y py-2 mb-2 flex justify-between items-center">
@@ -186,6 +188,35 @@
                             <a th:href="@{/users/{id}(id=${singleComment.user.id})}" th:text="${singleComment.user.username}" class="font-semibold text-gray-900 hover:underline"></a>
                             <p th:text="${singleComment.content}" class="text-gray-700"></p>
                             <p th:text="${#temporals.format(singleComment.createdAt, 'dd MMM yyyy HH:mm')}" class="text-xs text-gray-500 mt-1">Date goes here</p>
+                            <!-- This is the comment like/unlike section -->
+                            <div class="flex items-center gap-3 mt-1">
+
+                                <!-- like button (show only if user has not liked) -->
+                                <form th:unless="${#lists.contains(singleComment.likes.![user.email], #authentication.principal.attributes['email'])}"
+                                      th:action="@{'/comments/' + ${singleComment.id} + '/like'}"
+                                      method="post">
+                                    <button type="submit"
+                                            class="text-xs text-blue-600 hover:underline">
+                                        Like
+                                    </button>
+                                </form>
+
+                                <!-- unlike button (show only if user has liked) -->
+                                <form th:if="${#lists.contains(singleComment.likes.![user.email], #authentication.principal.attributes['email'])}"
+                                      th:action="@{'/comments/' + ${singleComment.id} + '/unlike'}"
+                                      method="post">
+                                    <button type="submit"
+                                            class="text-xs text-red-600 hover:underline">
+                                        Unlike
+                                    </button>
+                                </form>
+
+                                <!-- Like counter -->
+                                <span class="text-xs text-gray-500">
+                                    <span th:text="${#lists.size(singleComment.likes)}"></span> like(s)
+                                </span>
+                            </div>
+
 
                             <!-- check whether a user is allowed to edit a post -->
                             <div th:if="${singleComment.user.email == #authentication.principal.attributes['email']}"
