@@ -215,8 +215,8 @@
 <!--                    View Replies • <span th:text="${#lists.size(postItem.comment)}"></span> replies-->
 <!--                </a>-->
 
-                </article>
-        </div>
+<!--                </article>-->
+<!--        </div>-->
         <div class="join grid grid-cols-2 mt-6" th:if="${page.totalPages > 0}">
             <a th:if="${!page.first}"
                th:href="@{/posts(page=${currentPage - 1})}"
