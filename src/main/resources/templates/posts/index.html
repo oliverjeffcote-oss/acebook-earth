@@ -31,7 +31,7 @@
             </button>
 
             <span class="hidden md:inline-block text-sm text-gray-500 mr-2">
-                Hi, <span sec:authentication="principal.attributes['username']">User</span>
+                Hi, <span sec:authentication="principal.attributes['currentUser']" th:text="${#authentication.principal.attributes['preferred_username']}">User</span>
             </span>
 
             <div class="dropdown dropdown-end">
