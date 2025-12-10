@@ -50,7 +50,11 @@
     </span>
 
     <span th:case="'ACCEPTED'">
-        <button style="display:inline; margin-left: 0.5rem;" disabled>Already Friends</button>
+        <form th:action="@{'/users/' + ${user.id} + '/remove'}"
+              method="post"
+              style="display:inline; margin-left: 0.5rem;">
+        <button type="submit">Remove Friend</button>
+        </form>
     </span>
 
     <span th:case="*">
