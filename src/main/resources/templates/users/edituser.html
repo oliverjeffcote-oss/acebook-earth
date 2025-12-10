@@ -5,6 +5,10 @@
     <meta charset="UTF-8"/>
     <title th:text="Edit + ${user.username} + '’s Acebook Profile'">Acebook Profile</title>
     <link rel="stylesheet" href="/main.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <!-- lucide icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <!--<body>-->
 <!--<h2>-->
@@ -19,8 +23,9 @@
 <!--    <title th:text="${user.username} + ''s Profile – Edit'">Edit Profile</title>-->
 <!--    <link rel="stylesheet" href="/main.css" />-->
 <!--</head>-->
-<body>
-
+<body class="bg-gray-100 min-h-screen flex flex-col" data-theme="light">
+<th:block th:replace="fragments/layout :: navbar"></th:block>
+<main class="bg-gray-100 flex-grow flex justify-center items-start pt-8 pb-8">
 <h2>Edit your Acebook profile</h2>
 
 <p>
@@ -124,6 +129,6 @@
         <a th:href="@{/users/profile}" class="btn" style="margin-left: 0.5rem;">Cancel</a>
     </div>
 </form>
-
+</main>
 </body>
 </html>
