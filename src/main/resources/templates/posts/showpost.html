@@ -188,7 +188,7 @@
                             <p th:text="${#temporals.format(singleComment.createdAt, 'dd MMM yyyy HH:mm')}" class="text-xs text-gray-500 mt-1">Date goes here</p>
 
                             <!-- check whether a user is allowed to edit a post -->
-                            <div th:if="${post.user.email == #authentication.principal.attributes['email']}"
+                            <div th:if="${singleComment.user.email == #authentication.principal.attributes['email']}"
                                  class="flex items-center gap-1">
 
                                 <!-- edit a comment in a post -->
