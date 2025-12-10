@@ -36,9 +36,13 @@
                     <i data-lucide="search" class="w-5 h-5"></i>
                 </button>
 
+                <span class="hidden md:inline-block text-sm text-gray-500 mr-2">
+                    Hi, <span sec:authentication="principal.attributes['currentUser']" th:text="${#authentication.principal.attributes['preferred_username']}">User</span>
+                </span>
                 <!-- avatar dropdown -->
                 <div class="dropdown dropdown-end">
                     <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+
                         <div class="w-10 rounded-full ring ring-gray-300">
                             <img src="https://placehold.co/40x40/374151/ffffff?text=Me" alt="User Avatar"/>
                         </div>
