@@ -33,8 +33,14 @@
                     </div>
                     <!-- post owner username -->
                     <div>
-                        <a th:href="@{/users/{id}(id=${post.user.id})}" th:text="${post.user.username}"class="font-semibold text-gray-900">Username goes here</a>
-                        <p  th:text="${#temporals.format(post.createdAt, 'dd MMM yyyy HH:mm')}" class="text-xs text-gray-500">Date Goes Here</p>
+                        <a th:href="@{/users/{id}(id=${post.user.id})}"
+                           th:text="${post.user.username}"
+                           class="font-semibold text-gray-900"></a>
+
+                        <p class="text-xs text-gray-500">
+                                <span th:text="${#temporals.format(post.createdAt, 'dd MMM yyyy HH:mm')}"></span>
+                                <span th:if="${post.editedAt != null}"> (edited)</span>
+                        </p>
                     </div>
                 </div>
 
@@ -99,7 +105,14 @@
                         <div class="bg-gray-100 p-2 rounded-xl text-sm max-w-[85%]">
                             <a th:href="@{/users/{id}(id=${singleComment.user.id})}" th:text="${singleComment.user.username}" class="font-semibold text-gray-900 hover:underline"></a>
                             <p th:text="${singleComment.content}" class="text-gray-700"></p>
-                            <p th:text="${#temporals.format(singleComment.createdAt, 'dd MMM yyyy HH:mm')}" class="text-xs text-gray-500 mt-1">Date goes here</p>
+                            <!-- timestamp + edited label -->
+                            <!-- timestamp + edited label -->
+                            <p class="text-xs text-gray-500 mt-1">
+                                <span th:text="${#temporals.format(singleComment.createdAt, 'dd MMM yyyy HH:mm')}"></span>
+                                <span th:if="${singleComment.editedAt != null}">(edited)</span>
+                            </p>
+
+
                             <!-- This is the comment like/unlike section -->
                             <div class="flex items-center gap-3 mt-1">
 
