@@ -10,6 +10,14 @@
 
 <h2>This is <span th:text="${user.username}">Username</span>’s profile page</h2>
 
+<div th:if="${relationship == null and loggedInUser.id != user.id}">
+    <form th:action="@{'/users/' + ${user.id} + '/requests/add'}"
+          method="post"
+          style="display:inline; margin-left: 0.5rem;">
+        <button type="submit">Add Friend</button>
+    </form>
+</div>
+
 <!-- 🔗 Friendship controls (incoming changes)-->
 <div th:if="${relationship != null}"
      th:switch="${relationship.status.name()}">
