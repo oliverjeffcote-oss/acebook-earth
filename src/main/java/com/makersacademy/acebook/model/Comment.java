@@ -8,6 +8,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity @Getter
 @Setter
@@ -34,6 +35,10 @@ public class Comment {
 
     @Column(name = "edited_at")
     private LocalDateTime editedAt;
+
+    // CommentLike.comments is the owner of this relationship
+    @OneToMany(mappedBy = "comment")
+    private List<CommentLike> likes;
 
     public Comment(String content) {
         this.content = content;

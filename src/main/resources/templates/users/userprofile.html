@@ -1,108 +1,182 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
-<head lang="en">
-    <meta charset="UTF-8"/>
-    <title th:text="${user.username} + '’s Acebook Profile'">Acebook Profile</title>
-    <link rel="stylesheet" href="/main.css" />
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
+      data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${user?.username} + '’s Profile'">User Profile</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <!-- lucide icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body>
+<body class="bg-gray-100 flex flex-col min-h-screen">
 
-<h2>This is <span th:text="${user.username}">Username</span>’s profile page</h2>
+<th:block th:replace="fragments/layout :: navbar"></th:block>
 
-<div th:if="${relationship == null and loggedInUser.id != user.id}">
-    <form th:action="@{'/users/' + ${user.id} + '/requests/add'}"
-          method="post"
-          style="display:inline; margin-left: 0.5rem;">
-        <button type="submit">Add Friend</button>
-    </form>
-</div>
-
-<!-- 🔗 Friendship controls (incoming changes)-->
-<div th:if="${relationship != null}"
-     th:switch="${relationship.status.name()}">
-
-    <span th:case="'PENDING'">
-
-        <span th:if="${relationship.receiver.id == loggedInUser.id}">
-            <form th:action="@{'/users/' + ${relationship.requester.id} + '/requests/accept'}"
-                  method="post"
-                  style="display:inline; margin-left: 0.5rem;">
-                <button type="submit">Accept Friend Request</button>
-            </form>
-
-            <form th:action="@{'/users/' + ${relationship.requester.id} + '/requests/reject'}"
-                  method="post"
-                  style="display:inline; margin-left: 0.5rem;">
-                <button type="submit">Reject Friend Request</button>
-            </form>
-        </span>
-
-        <span th:if="${relationship.requester.id == loggedInUser.id}">
-            <button style="display:inline; margin-left: 0.5rem;" disabled>Pending Acceptance</button>
-        </span>
-
-    </span>
-
-    <span th:case="'ACCEPTED'">
-        <button style="display:inline; margin-left: 0.5rem;" disabled>Already Friends</button>
-    </span>
-
-    <span th:case="*">
-        <!-- No special status -->
-    </span>
-</div>
-
-
-<br/>
-
-<!-- 💁 Your richer profile info (your version) -->
-<ul>
-    <li>
-        <span>Photo:</span>
-        <span th:if="${user.imagePath != null}">
-            <img th:src="${user.imagePath}"
-                 alt="Profile photo"
-                 style="max-width: 200px; max-height: 200px;" />
-        </span>
-        <span th:if="${user.imagePath == null}">
-            No photo yet
-        </span>
-    </li>
-    <li><strong>About Me:</strong> <span th:text="${user.description}">About Me</span></li>
-    <li><strong>Birthday:</strong> <span th:text="${user.birthday}">Birthday</span></li>
-    <li><strong>Location:</strong> <span th:text="${user.location}">Location</span></li>
-    <li><strong>Education:</strong> <span th:text="${user.education}">Education</span></li>
-    <li><strong>Where I'm From:</strong> <span th:text="${user.birthplace}">Where I'm From</span></li>
-    <li><strong>Where I Work:</strong> <span th:text="${user.employment}">Where I Work</span></li>
-</ul>
-
-<hr/>
-
-<!-- ✏️ Edit profile button (your version) -->
-<form th:action="@{/users/edit}" method="get">
-    <button type="submit" class="btn btn-primary">✏️ Edit</button>
+<form th:action="@{/}" method="get">
+    <button type="submit" class="btn btn-primary">↩️ Back to Posts</button>
 </form>
 
-<hr/>
+<main class="flex-grow flex justify-center items-start pt-8 pb-8 px-4">
+    <div class="w-full max-w-2xl">
 
-<!-- 🧪 Debug/info table (incoming version) -->
-<table>
-    <thead>
-    <tr>
-        <th>ID</th>
-        <th>Username</th>
-        <th>Active?</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr>
-        <td th:text="${user.id}"></td>
-        <td th:text="${user.username}"></td>
-        <td th:text="${user.enabled}"></td>
-    </tr>
-    </tbody>
-</table>
+        <div class="card w-full bg-white border border-gray-200 rounded-xl shadow-lg">
 
+            <div class="relative">
+                <div class="h-32 bg-gradient-to-r from-blue-500 to-sky-400 rounded-t-xl"></div>
+
+                <div class="absolute -bottom-12 left-6">
+                    <div class="avatar online">
+                        <div class="w-24 h-24 rounded-full border-4 border-white bg-gray-300 overflow-hidden">
+
+                            <img th:if="${user?.imagePath != null}"
+                                 th:src="${user.imagePath}"
+                                 class="object-cover w-full h-full"/>
+
+                            <img th:if="${user?.imagePath == null and #authentication?.principal?.attributes != null and #authentication.principal.attributes['picture'] != null}"
+                                 th:src="${#authentication.principal.attributes['picture']}"
+                                 class="object-cover w-full h-full"/>
+
+                            <img th:if="${user?.imagePath == null and (#authentication?.principal?.attributes == null or #authentication.principal.attributes['picture'] == null)}"
+                                 th:src="'https://placehold.co/96x96/4c6ef5/ffffff?text=' + ${user?.username != null ? #strings.substring(user.username,0,1) : 'U'}"
+                                 alt="Profile" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-body p-6 pt-16">
+                <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
+                    <div>
+                        <h2 class="card-title text-2xl font-bold text-gray-900" th:text="${user?.username}">
+                            Username
+                        </h2>
+
+                        <p class="text-sm text-gray-500 flex flex-wrap items-center mt-1">
+                                <span class="flex items-center mr-3">
+                                    <i data-lucide="mail" class="w-3.5 h-3.5 mr-1"></i>
+                                    <span th:text="${user?.username} + '@acebook.com'">email</span>
+                                </span>
+
+                            <span class="flex items-center" th:if="${user?.location != null}">
+                                    <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1 ml-1"></i>
+                                    <span th:text="${user.location}">Location</span>
+                                </span>
+                        </p>
+                    </div>
+
+                    <div class="flex gap-2">
+
+                        <div th:if="${loggedInUser?.id == user?.id}">
+                            <form th:action="@{/users/edit}" method="get">
+                                <button type="submit" class="btn btn-ghost btn-sm text-blue-500 hover:bg-blue-50">
+                                    <i data-lucide="settings" class="w-4 h-4"></i> Edit
+                                </button>
+                            </form>
+                        </div>
+
+                        <div th:unless="${loggedInUser?.id == user?.id}">
+
+                            <div th:if="${relationship == null}">
+                                <form th:action="@{'/users/' + ${user.id} + '/requests/add'}" method="post">
+                                    <button type="submit" class="btn btn-primary btn-sm rounded-full">
+                                        <i data-lucide="user-plus" class="w-4 h-4"></i> Add Friend
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div th:if="${relationship != null}" th:switch="${relationship?.status?.name()}">
+
+                                    <span th:case="'PENDING'">
+                                        <div th:if="${relationship?.receiver?.id == loggedInUser?.id}" class="flex gap-2">
+                                            <form th:action="@{'/users/' + ${relationship.requester.id} + '/requests/accept'}" method="post">
+                                                <button type="submit" class="btn btn-success btn-sm text-white rounded-full">Accept</button>
+                                            </form>
+                                            <form th:action="@{'/users/' + ${relationship.requester.id} + '/requests/reject'}" method="post">
+                                                <button type="submit" class="btn btn-error btn-sm text-white rounded-full">Reject</button>
+                                            </form>
+                                        </div>
+
+                                        <div th:if="${relationship?.requester?.id == loggedInUser?.id}">
+                                            <button class="btn btn-disabled btn-sm rounded-full">Request Pending</button>
+                                        </div>
+                                    </span>
+
+                                    <span th:case="'ACCEPTED'">
+                                        <form th:action="@{'/users/' + ${user.id} + '/remove'}" method="post">
+                                            <button type="submit" class="btn btn-error btn-sm text-white rounded-full">Remove Friend</button>
+                                        </form>
+                                    </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-5 mt-4 border-b pb-4">
+                    <div class="flex items-center text-sm font-medium">
+                        <i data-lucide="heart" class="w-4 h-4 mr-1.5 text-red-500 fill-red-500 shrink-0"></i>
+                        <span class="font-bold text-base text-gray-800 mr-1.5">0</span>
+                        <span class="text-gray-500">Likes</span>
+                    </div>
+                    <div class="flex items-center text-sm font-medium">
+                        <i data-lucide="send" class="w-4 h-4 mr-1.5 text-blue-500 shrink-0"></i>
+                        <span class="font-bold text-base text-gray-800 mr-1.5">0</span>
+                        <span class="text-gray-500">Posts</span>
+                    </div>
+                </div>
+
+                <div class="space-y-3 pt-4">
+                    <h3 class="font-semibold text-gray-700">About Me</h3>
+                    <p class="text-sm text-gray-600 italic"
+                       th:text="${user?.description ?: 'No bio yet.'}">
+                    </p>
+
+                    <div class="divider"></div>
+
+                    <div class="flex items-start" th:if="${user?.birthday != null}">
+                        <i data-lucide="cake" class="w-5 h-5 mr-3 text-purple-500 mt-1"></i>
+                        <div>
+                            <p class="font-medium text-gray-700">Birthday</p>
+                            <p class="text-sm text-gray-500" th:text="${user.birthday}"></p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start" th:if="${user?.education != null}">
+                        <i data-lucide="graduation-cap" class="w-5 h-5 mr-3 text-red-500 mt-1"></i>
+                        <div>
+                            <p class="font-medium text-gray-700">Education</p>
+                            <p class="text-sm text-gray-500" th:text="${user.education}"></p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start" th:if="${user?.employment != null}">
+                        <i data-lucide="briefcase" class="w-5 h-5 mr-3 text-orange-500 mt-1"></i>
+                        <div>
+                            <p class="font-medium text-gray-700">Employment</p>
+                            <p class="text-sm text-gray-500" th:text="${user.employment}"></p>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start" th:if="${user?.birthplace != null}">
+                        <i data-lucide="globe" class="w-5 h-5 mr-3 text-teal-500 mt-1"></i>
+                        <div>
+                            <p class="font-medium text-gray-700">Birthplace</p>
+                            <p class="text-sm text-gray-500" th:text="${user.birthplace}"></p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    lucide.createIcons();
+</script>
 </body>
 </html>
