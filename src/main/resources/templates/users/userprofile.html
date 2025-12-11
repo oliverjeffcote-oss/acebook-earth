@@ -10,7 +10,6 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.2/dist/full.min.css" rel="stylesheet" type="text/css" />
-    <!-- lucide icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="bg-gray-100 flex flex-col min-h-screen">
@@ -62,7 +61,7 @@
                                     <span th:text="${user?.username} + '@acebook.com'">email</span>
                                 </span>
 
-                            <span class="flex items-center" th:if="${user?.location != null}">
+                            <span class="flex items-center" th:if="${not #strings.isEmpty(user?.location)}">
                                     <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1 ml-1"></i>
                                     <span th:text="${user.location}">Location</span>
                                 </span>
@@ -106,7 +105,7 @@
                                         </div>
                                     </span>
 
-                                    <span th:case="'ACCEPTED'">
+                                <span th:case="'ACCEPTED'">
                                         <form th:action="@{'/users/' + ${user.id} + '/remove'}" method="post">
                                             <button type="submit" class="btn btn-error btn-sm text-white rounded-full">Remove Friend</button>
                                         </form>
@@ -131,8 +130,15 @@
 
                 <div class="space-y-3 pt-4">
                     <h3 class="font-semibold text-gray-700">About Me</h3>
+
                     <p class="text-sm text-gray-600 italic"
-                       th:text="${user?.description ?: 'No bio yet.'}">
+                       th:if="${not #strings.isEmpty(user?.description)}"
+                       th:text="${user.description}">
+                    </p>
+
+                    <p class="text-sm text-gray-400 italic"
+                       th:if="${#strings.isEmpty(user?.description)}">
+                        No bio yet.
                     </p>
 
                     <div class="divider"></div>
@@ -145,7 +151,7 @@
                         </div>
                     </div>
 
-                    <div class="flex items-start" th:if="${user?.education != null}">
+                    <div class="flex items-start" th:if="${not #strings.isEmpty(user?.education)}">
                         <i data-lucide="graduation-cap" class="w-5 h-5 mr-3 text-red-500 mt-1"></i>
                         <div>
                             <p class="font-medium text-gray-700">Education</p>
@@ -153,7 +159,7 @@
                         </div>
                     </div>
 
-                    <div class="flex items-start" th:if="${user?.employment != null}">
+                    <div class="flex items-start" th:if="${not #strings.isEmpty(user?.employment)}">
                         <i data-lucide="briefcase" class="w-5 h-5 mr-3 text-orange-500 mt-1"></i>
                         <div>
                             <p class="font-medium text-gray-700">Employment</p>
@@ -161,7 +167,7 @@
                         </div>
                     </div>
 
-                    <div class="flex items-start" th:if="${user?.birthplace != null}">
+                    <div class="flex items-start" th:if="${not #strings.isEmpty(user?.birthplace)}">
                         <i data-lucide="globe" class="w-5 h-5 mr-3 text-teal-500 mt-1"></i>
                         <div>
                             <p class="font-medium text-gray-700">Birthplace</p>
