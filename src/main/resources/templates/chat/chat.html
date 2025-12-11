@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head lang="en">
+    <meta charset="UTF-8"/>
+    <title>Acebook - Chat</title>
+    <link rel="stylesheet" href="/main.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.2/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body class="bg-gray-100 h-screen flex flex-col" data-theme="light">
+
+<th:block th:replace="fragments/layout :: navbar"></th:block>
+
+<main class="flex-grow overflow-hidden pt-6 pb-6 px-4">
+    <div class="max-w-7xl mx-auto h-full flex gap-6">
+
+        <div class="w-1/4 hidden md:flex flex-col bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden h-[calc(100vh-8rem)]">
+            <div class="p-4 border-b border-gray-100 bg-gray-50">
+                <h3 class="font-bold text-gray-700">Contacts</h3>
+            </div>
+            <div class="overflow-y-auto flex-grow">
+                <ul class="menu w-full p-2">
+                    <li th:each="user : ${users}" th:if="${user.username != myUsername}">
+                        <a th:href="@{/chat(username=${user.username})}"
+                           th:classappend="${user.username == selectedRecipient} ? 'active bg-blue-50 text-blue-500' : ''"
+                           class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50">
+
+                            <div class="avatar placeholder">
+                                <div class="bg-neutral text-neutral-content rounded-full w-8">
+                                    <span th:text="${#strings.substring(user.username,0,1).toUpperCase()}">U</span>
+                                </div>
+                            </div>
+                            <span th:text="${user.username}" class="font-medium">User Name</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="flex-grow bg-white rounded-lg shadow-md border border-gray-200 flex flex-col h-[calc(100vh-8rem)]">
+
+            <div class="p-4 border-b border-gray-100 flex items-center justify-between bg-white rounded-t-lg z-10">
+                <div class="flex items-center gap-3">
+                    <div th:if="${selectedRecipient != null}" class="avatar">
+                        <div class="w-10 rounded-full">
+                            <img th:src="@{'https://ui-avatars.com/api/?name=' + ${selectedRecipient} + '&background=random&color=fff'}" />
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-gray-800"
+                            th:text="${selectedRecipient != null} ? ${selectedRecipient} : 'Select a contact'">
+                            Select a contact
+                        </h2>
+                        <span th:if="${selectedRecipient != null}" class="text-xs text-green-500 flex items-center gap-1">
+                            <span class="w-2 h-2 bg-green-500 rounded-full"></span> Online
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <input type="hidden" id="currentUsername" th:value="${myUsername}" />
+            <input type="hidden" id="currentRecipient" th:value="${selectedRecipient}" />
+
+            <div id="messageArea" class="flex-grow overflow-y-auto p-6 space-y-4 bg-gray-50">
+
+                <div th:if="${selectedRecipient == null}" class="flex flex-col items-center justify-center h-full text-gray-400">
+                    <i data-lucide="message-square" class="w-16 h-16 mb-4 opacity-50"></i>
+                    <p>Select a user from the left to start chatting.</p>
+                </div>
+
+                <div th:each="msg : ${history}"
+                     th:class="${msg.sender.username == myUsername} ? 'chat chat-end' : 'chat chat-start'">
+
+                    <div class="chat-header text-xs opacity-50 mb-1"
+                         th:text="${msg.sender.username == myUsername} ? 'You' : ${msg.sender.username}">
+                        Sender
+                    </div>
+
+                    <div class="chat-bubble"
+                         th:classappend="${msg.sender.username == myUsername} ? 'chat-bubble-primary' : 'chat-bubble-secondary bg-gray-200 text-gray-800'"
+                         th:text="${msg.content}">
+                        Message Content
+                    </div>
+
+                    <div class="chat-footer opacity-50 text-[10px] mt-1">
+                        <span th:text="${#temporals.format(msg.timestamp, 'HH:mm')}">12:45</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div th:if="${selectedRecipient != null}" class="p-4 border-t border-gray-100 bg-white rounded-b-lg">
+                <form onsubmit="sendMessage(event)" class="flex gap-2 items-center">
+                    <input type="text"
+                           id="messageInput"
+                           class="input input-bordered w-full rounded-full bg-gray-100 focus:bg-white transition-colors"
+                           placeholder="Type a message..."
+                           autocomplete="off" />
+
+                    <button type="submit" class="btn btn-primary btn-circle">
+                        <i data-lucide="send" class="w-5 h-5 mt-0.5 mr-0.5"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<script th:inline="javascript">
+    // Cache DOM elements to avoid repeated lookups
+    const messageArea = document.getElementById('messageArea');
+    const usernameInput = document.getElementById('currentUsername');
+    const recipientInput = document.getElementById('currentRecipient');
+    const messageInput = document.getElementById('messageInput');
+    let stompClient = null;
+
+    function connect() {
+        const socket = new SockJS('/ws');
+        stompClient = Stomp.over(socket);
+
+        // Disable debug logs in console
+        stompClient.debug = () => {};
+
+        stompClient.connect({}, function (frame) {
+            stompClient.subscribe('/user/queue/messages', function (messageOutput) {
+                const msg = JSON.parse(messageOutput.body);
+                handleIncomingMessage(msg);
+            });
+        }, function(error) {
+            // Error handling logic (silent or UI notification)
+        });
+    }
+
+    function handleIncomingMessage(msg) {
+        // 1. Get current UI state
+        const currentUser = (usernameInput.value || "").toLowerCase();
+        const activePartner = (recipientInput.value || "").toLowerCase();
+
+        // 2. Extract message data (Aligned with Java OutgoingChatMessageDTO)
+        const sender = (msg.senderName || "").toLowerCase();
+        const recipient = (msg.recipientName || "").toLowerCase();
+
+        // 3. Filter Logic
+        // Condition A: Message is FROM the person I'm chatting with
+        const isIncoming = sender === activePartner;
+        // Condition B: Message is FROM ME (Echo) sent TO the person I'm chatting with
+        const isOutgoing = sender === currentUser && recipient === activePartner;
+
+        if (isIncoming || isOutgoing) {
+            renderMessageBubble(msg);
+            scrollToBottom();
+        }
+    }
+
+   function renderMessageBubble(msg) {
+    const currentUser = (usernameInput.value || "").toLowerCase();
+    const sender = (msg.senderName || "").toLowerCase();
+    const isMe = (sender === currentUser);
+
+    const chatDiv = document.createElement('div');
+    chatDiv.className = isMe ? 'chat chat-end' : 'chat chat-start';
+
+    const headerDiv = document.createElement('div');
+    headerDiv.className = 'chat-header text-xs opacity-50 mb-1';
+    headerDiv.innerText = isMe ? 'You' : msg.senderName;
+
+    const bubbleDiv = document.createElement('div');
+    bubbleDiv.className = isMe
+        ? 'chat-bubble chat-bubble-primary'
+        : 'chat-bubble chat-bubble-secondary bg-gray-200 text-gray-800';
+    bubbleDiv.innerText = msg.content;
+
+    const footerDiv = document.createElement('div');
+    footerDiv.className = 'chat-footer opacity-50 text-[10px] mt-1';
+
+    // Timestamp locale time converter
+    footerDiv.innerText = formatLocalTime(msg.timestamp);
+
+    chatDiv.appendChild(headerDiv);
+    chatDiv.appendChild(bubbleDiv);
+    chatDiv.appendChild(footerDiv);
+
+    messageArea.appendChild(chatDiv);
+}
+
+    function sendMessage(event) {
+        event.preventDefault();
+
+        const content = messageInput.value.trim();
+        const recipient = recipientInput.value;
+
+        if (content && recipient && stompClient) {
+            const payload = {
+                content: content,
+                recipientUsername: recipient
+            };
+
+            stompClient.send("/app/private-message", {}, JSON.stringify(payload));
+            messageInput.value = '';
+        }
+    }
+
+    function scrollToBottom() {
+        if (messageArea) {
+            messageArea.scrollTop = messageArea.scrollHeight;
+        }
+    }
+
+    function formatLocalTime(timestampStr) {
+    if (!timestampStr) return 'Just now';
+
+    // Create a Date object from the ISO string
+    const date = new Date(timestampStr);
+
+    // Check if the date is valid (in case of parsing errors)
+    if (isNaN(date.getTime())) return 'Just now';
+
+    // Format using the user's browser locale
+    // short = 1:30 PM (or 13:30 based on system settings)
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+        // Initialize
+        lucide.createIcons();
+        connect();
+        scrollToBottom();
+</script>
+
+</body>
+</html>
