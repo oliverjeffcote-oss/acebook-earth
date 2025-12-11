@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.user.SimpUserRegistry;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.stereotype.Controller;
@@ -25,6 +26,8 @@ public class ChatController {
     private final SimpMessagingTemplate messagingTemplate;
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
+
+    private final SimpUserRegistry userRegistry;
 
     // DTOs
     record ChatMessageDTO(String content, String recipientUsername) {} // For Private
@@ -112,6 +115,21 @@ public class ChatController {
 
         ChatMessage saved = chatMessageRepository.save(chatMessage);
 
+        System.out.println("--------------------------------------------------");
+        System.out.println("🔍 WEBSOCKET DIAGNOSTICS");
+        System.out.println("Targeting Recipient (from DB): [" + recipient.getUsername() + "]");
+
+        System.out.println("Who is actually connected right now?");
+        userRegistry.getUsers().forEach(user -> {
+            System.out.println(" - Connected User: [" + user.getName() + "]");
+        });
+
+        // Check if the specific user is found
+        boolean isRecipientOnline = userRegistry.getUser(recipient.getUsername()) != null;
+        System.out.println("Is Recipient Online according to Registry? " + isRecipientOnline);
+        System.out.println("--------------------------------------------------");
+        // --- DEBUGGING BLOCK END ---
+
         OutgoingChatMessageDTO outgoingDto = new OutgoingChatMessageDTO(
                 saved.getContent(),
                 saved.getSender().getUsername(),
@@ -120,10 +138,9 @@ public class ChatController {
 
         );
 
-        messagingTemplate.convertAndSendToUser(recipient.getUsername(), "user/queue/messages", outgoingDto);
-        messagingTemplate.convertAndSendToUser(principal.getName(), "user/queue/messages", outgoingDto);
-        System.out.println("Sending to User: " + recipient.getUsername());
-        System.out.println("Sending to Principal: " + principal.getName());
+        messagingTemplate.convertAndSendToUser(recipient.getUsername(), "/queue/messages", outgoingDto);
+        messagingTemplate.convertAndSendToUser(principal.getName(), "/queue/messages", outgoingDto);
+
     }
 
     // Helper
