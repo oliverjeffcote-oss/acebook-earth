@@ -15,32 +15,34 @@
 </head>
 <body class="bg-gray-100 flex flex-col min-h-screen">
 
+<!-- Navbar -->
 <th:block th:replace="fragments/layout :: navbar"></th:block>
-
-<form th:action="@{/}" method="get">
-    <button type="submit" class="btn btn-primary">↩️ Back to Posts</button>
-</form>
 
 <main class="flex-grow flex justify-center items-start pt-8 pb-8 px-4">
     <div class="w-full max-w-2xl">
 
+        <!-- Profile card -->
         <div class="card w-full bg-white border border-gray-200 rounded-xl shadow-lg">
 
+            <!-- Banner + avatar -->
             <div class="relative">
                 <div class="h-32 bg-gradient-to-r from-blue-500 to-sky-400 rounded-t-xl"></div>
 
-                <div class="absolute -bottom-12 left-6">
+                <div class="absolute -bottom-12 left-1/2 -translate-x-1/2">
                     <div class="avatar online">
                         <div class="w-24 h-24 rounded-full border-4 border-white bg-gray-300 overflow-hidden">
 
+                            <!-- Custom profile image -->
                             <img th:if="${user?.imagePath != null}"
                                  th:src="${user.imagePath}"
                                  class="object-cover w-full h-full"/>
 
+                            <!-- Auth0 picture fallback -->
                             <img th:if="${user?.imagePath == null and #authentication?.principal?.attributes != null and #authentication.principal.attributes['picture'] != null}"
                                  th:src="${#authentication.principal.attributes['picture']}"
                                  class="object-cover w-full h-full"/>
 
+                            <!-- Last resort placeholder -->
                             <img th:if="${user?.imagePath == null and (#authentication?.principal?.attributes == null or #authentication.principal.attributes['picture'] == null)}"
                                  th:src="'https://placehold.co/96x96/4c6ef5/ffffff?text=' + ${user?.username != null ? #strings.substring(user.username,0,1) : 'U'}"
                                  alt="Profile" />
@@ -50,73 +52,109 @@
             </div>
 
             <div class="card-body p-6 pt-16">
-                <div class="flex flex-col sm:flex-row justify-between items-start gap-4">
+
+                <!-- Header: name, meta, actions all centered -->
+                <div class="flex flex-col items-center text-center gap-3">
+
+                    <!-- Name + meta -->
                     <div>
                         <h2 class="card-title text-2xl font-bold text-gray-900" th:text="${user?.username}">
                             Username
                         </h2>
 
-                        <p class="text-sm text-gray-500 flex flex-wrap items-center mt-1">
-                                <span class="flex items-center mr-3">
-                                    <i data-lucide="mail" class="w-3.5 h-3.5 mr-1"></i>
-                                    <span th:text="${user?.username} + '@acebook.com'">email</span>
-                                </span>
+                        <p class="text-sm text-gray-500 flex flex-col sm:flex-row sm:flex-wrap sm:justify-center mt-1 gap-1 sm:gap-2">
+                            <span class="flex items-center justify-center">
+                                <i data-lucide="mail" class="w-3.5 h-3.5 mr-1"></i>
+                                <span th:text="${user?.username} + '@acebook.com'">email</span>
+                            </span>
 
-                            <span class="flex items-center" th:if="${user?.location != null}">
-                                    <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1 ml-1"></i>
-                                    <span th:text="${user.location}">Location</span>
-                                </span>
+                            <span class="flex items-center justify-center" th:if="${user?.location != null}">
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1"></i>
+                                <span th:text="${user.location}">Location</span>
+                            </span>
                         </p>
                     </div>
 
-                    <div class="flex gap-2">
+                    <!-- Actions row -->
+                    <div class="flex flex-wrap justify-center gap-2">
 
+                        <!-- Back to posts -->
+                        <form th:action="@{/}" method="get">
+                            <button type="submit"
+                                    class="btn btn-ghost btn-sm rounded-full border border-gray-200 flex items-center gap-1 text-gray-600 hover:bg-gray-100">
+                                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                                <span>Back to posts</span>
+                            </button>
+                        </form>
+
+                        <!-- View friends (always visible) -->
+                        <a th:href="@{/users/{id}/friends(id=${user.id})}"
+                           class="btn btn-ghost btn-sm rounded-full border border-gray-200 flex items-center gap-1">
+                            <i data-lucide="users" class="w-4 h-4"></i>
+                            <span th:text="${loggedInUser != null and loggedInUser.id == user.id} ? 'View my friends' : 'View friends'">
+                                View friends
+                            </span>
+                        </a>
+
+                        <!-- Edit (only on your own profile) -->
                         <div th:if="${loggedInUser?.id == user?.id}">
                             <form th:action="@{/users/edit}" method="get">
-                                <button type="submit" class="btn btn-ghost btn-sm text-blue-500 hover:bg-blue-50">
-                                    <i data-lucide="settings" class="w-4 h-4"></i> Edit
+                                <button type="submit" class="btn btn-ghost btn-sm text-blue-500 hover:bg-blue-50 flex items-center gap-1">
+                                    <i data-lucide="settings" class="w-4 h-4"></i>
+                                    <span>Edit</span>
                                 </button>
                             </form>
                         </div>
 
+                        <!-- Friendship actions (only on other users' profiles) -->
                         <div th:unless="${loggedInUser?.id == user?.id}">
 
+                            <!-- No relationship yet: Add friend -->
                             <div th:if="${relationship == null}">
                                 <form th:action="@{'/users/' + ${user.id} + '/requests/add'}" method="post">
-                                    <button type="submit" class="btn btn-primary btn-sm rounded-full">
-                                        <i data-lucide="user-plus" class="w-4 h-4"></i> Add Friend
+                                    <button type="submit" class="btn btn-primary btn-sm rounded-full flex items-center gap-1">
+                                        <i data-lucide="user-plus" class="w-4 h-4"></i>
+                                        <span>Add Friend</span>
                                     </button>
                                 </form>
                             </div>
 
+                            <!-- Existing relationship -->
                             <div th:if="${relationship != null}" th:switch="${relationship?.status?.name()}">
 
-                                    <span th:case="'PENDING'">
-                                        <div th:if="${relationship?.receiver?.id == loggedInUser?.id}" class="flex gap-2">
-                                            <form th:action="@{'/users/' + ${relationship.requester.id} + '/requests/accept'}" method="post">
-                                                <button type="submit" class="btn btn-success btn-sm text-white rounded-full">Accept</button>
-                                            </form>
-                                            <form th:action="@{'/users/' + ${relationship.requester.id} + '/requests/reject'}" method="post">
-                                                <button type="submit" class="btn btn-error btn-sm text-white rounded-full">Reject</button>
-                                            </form>
-                                        </div>
-
-                                        <div th:if="${relationship?.requester?.id == loggedInUser?.id}">
-                                            <button class="btn btn-disabled btn-sm rounded-full">Request Pending</button>
-                                        </div>
-                                    </span>
-
-                                    <span th:case="'ACCEPTED'">
-                                        <form th:action="@{'/users/' + ${user.id} + '/remove'}" method="post">
-                                            <button type="submit" class="btn btn-error btn-sm text-white rounded-full">Remove Friend</button>
+                                <!-- Pending friendship -->
+                                <span th:case="'PENDING'">
+                                    <!-- I am the receiver: show Accept/Reject -->
+                                    <div th:if="${relationship?.receiver?.id == loggedInUser?.id}" class="flex gap-2 justify-center">
+                                        <form th:action="@{'/users/' + ${relationship.requester.id} + '/requests/accept'}" method="post">
+                                            <button type="submit" class="btn btn-success btn-sm text-white rounded-full">Accept</button>
                                         </form>
-                                    </span>
+                                        <form th:action="@{'/users/' + ${relationship.requester.id} + '/requests/reject'}" method="post">
+                                            <button type="submit" class="btn btn-error btn-sm text-white rounded-full">Reject</button>
+                                        </form>
+                                    </div>
+
+                                    <!-- I am the requester: pending state -->
+                                    <div th:if="${relationship?.requester?.id == loggedInUser?.id}">
+                                        <button class="btn btn-disabled btn-sm rounded-full">Request Pending</button>
+                                    </div>
+                                </span>
+
+                                <!-- Accepted friendship -->
+                                <span th:case="'ACCEPTED'">
+                                    <form th:action="@{'/users/' + ${user.id} + '/remove'}" method="post">
+                                        <button type="submit" class="btn btn-error btn-sm text-white rounded-full">
+                                            Remove Friend
+                                        </button>
+                                    </form>
+                                </span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex items-center space-x-5 mt-4 border-b pb-4">
+                <!-- Stats row -->
+                <div class="flex items-center space-x-5 mt-4 border-b pb-4 justify-center">
                     <div class="flex items-center text-sm font-medium">
                         <i data-lucide="heart" class="w-4 h-4 mr-1.5 text-red-500 fill-red-500 shrink-0"></i>
                         <span class="font-bold text-base text-gray-800 mr-1.5">0</span>
@@ -129,6 +167,7 @@
                     </div>
                 </div>
 
+                <!-- About & details -->
                 <div class="space-y-3 pt-4">
                     <h3 class="font-semibold text-gray-700">About Me</h3>
                     <p class="text-sm text-gray-600 italic"
@@ -168,10 +207,11 @@
                             <p class="text-sm text-gray-500" th:text="${user.birthplace}"></p>
                         </div>
                     </div>
-
                 </div>
+
             </div>
         </div>
+
     </div>
 </main>
 
