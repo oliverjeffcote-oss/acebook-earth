@@ -81,6 +81,9 @@
                                th:text="${postItem.user.username}">Username</a>
                             <p class="text-xs text-gray-500"
                                th:text="${#temporals.format(postItem.createdAt, 'dd MMM yyyy HH:mm')}">Date</p>
+                            <span th:if="${postItem.editedAt != null}" class="text-xs text-gray-500 ml-1">
+                                (edited)
+                            </span>
                         </div>
                     </div>
 
