@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Collections;
 import java.util.UUID;
 
 @Controller
@@ -50,6 +51,32 @@ public class UsersController {
 
         return new RedirectView("/posts");
     }
+
+    // ---------------------------------------------------------------------
+    // Search bar functionality
+    // ---------------------------------------------------------------------
+    @GetMapping("/users/search")
+    public String searchUsers(@RequestParam(name = "query", required = false) String query,
+                              Model model) {
+
+        // Handle empty / missing query gracefully
+        if (query == null || query.trim().isEmpty()) {
+            model.addAttribute("query", "");
+            model.addAttribute("results", java.util.Collections.emptyList());
+            return "users/searchresults";
+        }
+
+        String trimmedQuery = query.trim();
+
+        // Search by username (case-insensitive)
+        var results = userRepository.findByUsernameContainingIgnoreCase(trimmedQuery);
+
+        model.addAttribute("query", trimmedQuery);
+        model.addAttribute("results", results);
+
+        return "users/searchresults";
+    }
+
 
     // ---------------------------------------------------------------------
     // View SOMEONE ELSE'S profile by id: /users/{id}
