@@ -27,7 +27,10 @@ public class S3Service {
         return "https://" + bucket + ".s3." + region + ".amazonaws.com/" + key;
     }
 
-    public void deleteImage(String key) {
+    public void deleteImage(String imageUrl) {
+        String prefix = "https://" + bucket + ".s3." + region + ".amazonaws.com/";
+        int prefixEnd = imageUrl.indexOf(prefix) + prefix.length();
+        String key = (prefixEnd > prefix.length() - 1) ? imageUrl.substring(prefixEnd) : "";
         s3Template.deleteObject(bucket, key);
     }
 }

@@ -55,8 +55,21 @@
                 <!-- avatar dropdown -->
                 <div class="dropdown dropdown-end">
                     <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
-                        <div class="w-10 rounded-full ring ring-gray-300">
-                            <img src="https://placehold.co/40x40/374151/ffffff?text=Me" alt="User Avatar"/>
+                        <div class="w-10 rounded-full ring ring-gray-300 overflow-hidden">
+
+                            <img th:if="${user?.imagePath != null}"
+                                 th:src="${user.imagePath}"
+                                 class="object-cover w-full h-full"/>
+
+                            <img th:if="${user?.imagePath == null and #authentication?.principal?.attributes != null and #authentication.principal.attributes['picture'] != null}"
+                                 th:src="${#authentication.principal.attributes['picture']}"
+                                 class="object-cover w-full h-full"/>
+
+                            <img th:if="${user?.imagePath == null and (#authentication?.principal?.attributes == null or #authentication.principal.attributes['picture'] == null)}"
+                                 th:src="'https://placehold.co/40x40/4c6ef5/ffffff?text=' + ${user?.username != null ? #strings.substring(user.username,0,1) : 'U'}"
+                                 alt="User Avatar" />
+
+<!--                            <img src="https://placehold.co/40x40/374151/ffffff?text=Me" alt="User Avatar"/>-->
                         </div>
                     </div>
 

@@ -4,6 +4,7 @@ import com.makersacademy.acebook.model.Relationship;
 import com.makersacademy.acebook.model.User;
 import com.makersacademy.acebook.repository.RelationshipRepository;
 import com.makersacademy.acebook.repository.UserRepository;
+import com.makersacademy.acebook.services.S3Service;
 import com.makersacademy.acebook.repository.PostRepository;
 import com.makersacademy.acebook.repository.LikeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,9 @@ public class UsersController {
 
     @Autowired
     RelationshipRepository relationshipRepository;
+
+    @Autowired
+    private S3Service s3Service;
 
     @Autowired
     private PostRepository postRepository;
@@ -80,6 +84,18 @@ public class UsersController {
             model.addAttribute("query", "");
             model.addAttribute("results", java.util.Collections.emptyList());
             model.addAttribute("suggestedUsers", java.util.Collections.emptyList());
+
+            DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
+                    .getContext()
+                    .getAuthentication()
+                    .getPrincipal();
+
+            String username = (String) principal.getAttributes().get("https://myapp.com/username");
+            User currentUser = userRepository.findUserByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User not found: " + username));
+
+            model.addAttribute("user", currentUser);
+
             return "users/searchresults";
         }
 
@@ -165,6 +181,17 @@ public class UsersController {
             model.addAttribute("friendshipStatuses", friendshipStatuses);
             model.addAttribute("loggedInUser", loggedInUser);
         }
+
+        DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        String username = (String) principal.getAttributes().get("https://myapp.com/username");
+        User currentUser = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+
+        model.addAttribute("user", currentUser);
 
         return "users/searchresults";
     }
@@ -317,25 +344,11 @@ public class UsersController {
 
         // Handle optional new profile image upload
         if (imageFile != null && !imageFile.isEmpty()) {
-            String uploadDir = "uploads";
-
             try {
-                Files.createDirectories(Paths.get(uploadDir));
-
-                String originalFilename = StringUtils.cleanPath(imageFile.getOriginalFilename());
-                String extension = "";
-                int dotIndex = originalFilename.lastIndexOf('.');
-                if (dotIndex >= 0) {
-                    extension = originalFilename.substring(dotIndex); // includes the dot
-                }
-
-                String filename = UUID.randomUUID().toString() + extension;
-                Path destination = Paths.get(uploadDir).resolve(filename);
-
-                Files.copy(imageFile.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
-
-                // Store web path so Thymeleaf can render it
-                user.setImagePath("/uploads/" + filename);
+                String originalProfileImage = user.getImagePath();
+                String filename = s3Service.uploadImage(imageFile);
+                user.setImagePath(filename);
+                s3Service.deleteImage(originalProfileImage);
             } catch (IOException e) {
                 throw new RuntimeException("Failed to store profile image", e);
             }
