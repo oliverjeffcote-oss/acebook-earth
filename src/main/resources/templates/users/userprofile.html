@@ -10,19 +10,21 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.2/dist/full.min.css" rel="stylesheet" type="text/css" />
-    <!-- lucide icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body class="bg-gray-100 flex flex-col min-h-screen">
 
 <th:block th:replace="fragments/layout :: navbar"></th:block>
 
-<form th:action="@{/}" method="get">
-    <button type="submit" class="btn btn-primary">↩️ Back to Posts</button>
-</form>
-
 <main class="flex-grow flex justify-center items-start pt-8 pb-8 px-4">
-    <div class="w-full max-w-2xl">
+
+    <div class="w-full max-w-2xl relative">
+
+        <div class="absolute -left-16 top-5 hidden lg:block">
+            <a th:href="@{/}" class="btn btn-ghost btn-circle text-gray-500 hover:bg-gray-200" title="Back to Posts">
+                <i data-lucide="arrow-left" class="w-6 h-6"></i>
+            </a>
+        </div>
 
         <div class="card w-full bg-white border border-gray-200 rounded-xl shadow-lg">
 
@@ -62,7 +64,7 @@
                                     <span th:text="${user?.username} + '@acebook.com'">email</span>
                                 </span>
 
-                            <span class="flex items-center" th:if="${user?.location != null}">
+                            <span class="flex items-center" th:if="${not #strings.isEmpty(user?.location)}">
                                     <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1 ml-1"></i>
                                     <span th:text="${user.location}">Location</span>
                                 </span>
@@ -106,7 +108,7 @@
                                         </div>
                                     </span>
 
-                                    <span th:case="'ACCEPTED'">
+                                <span th:case="'ACCEPTED'">
                                         <form th:action="@{'/users/' + ${user.id} + '/remove'}" method="post">
                                             <button type="submit" class="btn btn-error btn-sm text-white rounded-full">Remove Friend</button>
                                         </form>
@@ -119,20 +121,27 @@
                 <div class="flex items-center space-x-5 mt-4 border-b pb-4">
                     <div class="flex items-center text-sm font-medium">
                         <i data-lucide="heart" class="w-4 h-4 mr-1.5 text-red-500 fill-red-500 shrink-0"></i>
-                        <span class="font-bold text-base text-gray-800 mr-1.5">0</span>
+                        <span class="font-bold text-base text-gray-800 mr-1.5" th:text="${likesCount}">0</span>
                         <span class="text-gray-500">Likes</span>
                     </div>
                     <div class="flex items-center text-sm font-medium">
                         <i data-lucide="send" class="w-4 h-4 mr-1.5 text-blue-500 shrink-0"></i>
-                        <span class="font-bold text-base text-gray-800 mr-1.5">0</span>
+                        <span class="font-bold text-base text-gray-800 mr-1.5" th:text="${postCount}">0</span>
                         <span class="text-gray-500">Posts</span>
                     </div>
                 </div>
 
                 <div class="space-y-3 pt-4">
                     <h3 class="font-semibold text-gray-700">About Me</h3>
+
                     <p class="text-sm text-gray-600 italic"
-                       th:text="${user?.description ?: 'No bio yet.'}">
+                       th:if="${not #strings.isEmpty(user?.description)}"
+                       th:text="${user.description}">
+                    </p>
+
+                    <p class="text-sm text-gray-400 italic"
+                       th:if="${#strings.isEmpty(user?.description)}">
+                        No bio yet.
                     </p>
 
                     <div class="divider"></div>
@@ -145,7 +154,7 @@
                         </div>
                     </div>
 
-                    <div class="flex items-start" th:if="${user?.education != null}">
+                    <div class="flex items-start" th:if="${not #strings.isEmpty(user?.education)}">
                         <i data-lucide="graduation-cap" class="w-5 h-5 mr-3 text-red-500 mt-1"></i>
                         <div>
                             <p class="font-medium text-gray-700">Education</p>
@@ -153,7 +162,7 @@
                         </div>
                     </div>
 
-                    <div class="flex items-start" th:if="${user?.employment != null}">
+                    <div class="flex items-start" th:if="${not #strings.isEmpty(user?.employment)}">
                         <i data-lucide="briefcase" class="w-5 h-5 mr-3 text-orange-500 mt-1"></i>
                         <div>
                             <p class="font-medium text-gray-700">Employment</p>
@@ -161,7 +170,7 @@
                         </div>
                     </div>
 
-                    <div class="flex items-start" th:if="${user?.birthplace != null}">
+                    <div class="flex items-start" th:if="${not #strings.isEmpty(user?.birthplace)}">
                         <i data-lucide="globe" class="w-5 h-5 mr-3 text-teal-500 mt-1"></i>
                         <div>
                             <p class="font-medium text-gray-700">Birthplace</p>
