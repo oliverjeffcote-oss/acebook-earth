@@ -67,6 +67,18 @@ public class CommentController {
                     .orElseThrow(() -> new RuntimeException("Comment not found"));
             model.addAttribute("comment", comment);
             model.addAttribute("postId", postId);
+
+            DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
+                    .getContext()
+                    .getAuthentication()
+                    .getPrincipal();
+
+            String username = (String) principal.getAttributes().get("https://myapp.com/username");
+            User currentUser = userRepository.findUserByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User not found: " + username));
+
+            model.addAttribute("user", currentUser);
+
             return "comments/edit";
         }
 

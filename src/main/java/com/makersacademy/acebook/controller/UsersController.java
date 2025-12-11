@@ -63,6 +63,18 @@ public class UsersController {
         if (query == null || query.trim().isEmpty()) {
             model.addAttribute("query", "");
             model.addAttribute("results", java.util.Collections.emptyList());
+
+            DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
+                    .getContext()
+                    .getAuthentication()
+                    .getPrincipal();
+
+            String username = (String) principal.getAttributes().get("https://myapp.com/username");
+            User currentUser = userRepository.findUserByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User not found: " + username));
+
+            model.addAttribute("user", currentUser);
+
             return "users/searchresults";
         }
 
@@ -73,6 +85,17 @@ public class UsersController {
 
         model.addAttribute("query", trimmedQuery);
         model.addAttribute("results", results);
+
+        DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        String username = (String) principal.getAttributes().get("https://myapp.com/username");
+        User currentUser = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+
+        model.addAttribute("user", currentUser);
 
         return "users/searchresults";
     }
