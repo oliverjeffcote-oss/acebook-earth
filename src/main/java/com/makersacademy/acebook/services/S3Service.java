@@ -21,7 +21,7 @@ public class S3Service {
     private String region;
 
     public String uploadImage(MultipartFile file) throws IOException {
-        String key = "posts/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
+        String key =  "images/" + UUID.randomUUID() + "_" + file.getOriginalFilename();
         s3Template.upload(bucket, key, file.getInputStream());
 
         return "https://" + bucket + ".s3." + region + ".amazonaws.com/" + key;

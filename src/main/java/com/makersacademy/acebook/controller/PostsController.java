@@ -48,13 +48,6 @@ public class PostsController {
     private S3Service s3Service;
 
     @GetMapping("/posts")
-//    public String index(@RequestParam(defaultValue="0") int page,Model model) {
-//        Pageable pageable = PageRequest.of(page, 10); ;
-//        Page<Post> posts = postRepository.getPostsNewestFirst(pageable);
-//        model.addAttribute("posts", posts.getContent());
-//        model.addAttribute("post", new Post());
-//        return "posts/index";
-//    }
 
     public String index(@RequestParam(defaultValue = "0") int page, Model model) {
         Pageable pageable = PageRequest.of(page, 10);
@@ -66,39 +59,39 @@ public class PostsController {
         return "posts/index";
     }
 
-    private String saveImageToUploads(MultipartFile imageFile) {
-        try {
-            String uploadDir = "uploads";
-            Files.createDirectories(Paths.get(uploadDir));
+//    private String saveImageToUploads(MultipartFile imageFile) {
+//        try {
+//            String uploadDir = "uploads";
+//            Files.createDirectories(Paths.get(uploadDir));
+//
+//            String originalFilename = imageFile.getOriginalFilename();
+//            String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+//            String filename = UUID.randomUUID() + extension;
+//
+//            Path destination = Paths.get(uploadDir).resolve(filename);
+//            Files.copy(imageFile.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
+//
+//            return "/uploads/" + filename;
+//
+//        } catch (IOException e) {
+//            throw new RuntimeException("Failed to save uploaded image", e);
+//        }
+//    }
 
-            String originalFilename = imageFile.getOriginalFilename();
-            String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-            String filename = UUID.randomUUID() + extension;
-
-            Path destination = Paths.get(uploadDir).resolve(filename);
-            Files.copy(imageFile.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
-
-            return "/uploads/" + filename;
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to save uploaded image", e);
-        }
-    }
-
-    private void deleteFileFromUploads(String imagePath) {
-        try {
-            // Convert "/uploads/abc.jpg" → "uploads/abc.jpg"
-            String relativePath = imagePath.replaceFirst("/", "");
-            Path filePath = Paths.get(relativePath);
-
-            if (Files.exists(filePath)) {
-                Files.delete(filePath);
-            }
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to delete image file", e);
-        }
-    }
+//    private void deleteFileFromUploads(String imagePath) {
+//        try {
+//            // Convert "/uploads/abc.jpg" → "uploads/abc.jpg"
+//            String relativePath = imagePath.replaceFirst("/", "");
+//            Path filePath = Paths.get(relativePath);
+//
+//            if (Files.exists(filePath)) {
+//                Files.delete(filePath);
+//            }
+//
+//        } catch (IOException e) {
+//            throw new RuntimeException("Failed to delete image file", e);
+//        }
+//    }
 
 
 
@@ -162,17 +155,17 @@ public class PostsController {
                 .orElseThrow(() -> new RuntimeException("Post not found"));
         post.setContent(updateContent);
         post.setEditedAt(LocalDateTime.now());
-        // If user checks "Remove image"
+//         If user checks "Remove image"
         if (removeImage != null && post.getImagePath() != null) {
-            deleteFileFromUploads(post.getImagePath());
+//            deleteFileFromUploads(post.getImagePath());
             post.setImagePath(null);
         }
         // If user uploads a new image
         if (newImage != null && !newImage.isEmpty()) {
             // Delete old image if it exists
-            if (post.getImagePath() != null) {
-                deleteFileFromUploads(post.getImagePath());
-            }
+//            if (post.getImagePath() != null) {
+//                deleteFileFromUploads(post.getImagePath());
+//            }
             // Save new image
             try {
                 String newPath = s3Service.uploadImage(newImage);
@@ -188,9 +181,9 @@ public class PostsController {
     @PostMapping("/posts/{id}/delete")
     public RedirectView deletePost(@PathVariable Long id) {
         Post post = postRepository.findById(id).orElseThrow();
-        if (post.getImagePath() != null) {
-            deleteFileFromUploads(post.getImagePath());
-        }
+//        if (post.getImagePath() != null) {
+//            deleteFileFromUploads(post.getImagePath());
+//        }
 
         postRepository.deleteById(id);
         return new RedirectView("/posts");
