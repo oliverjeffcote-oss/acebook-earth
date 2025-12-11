@@ -6,6 +6,7 @@ import com.makersacademy.acebook.model.Relationship;
 import com.makersacademy.acebook.model.User;
 import com.makersacademy.acebook.repository.RelationshipRepository;
 import com.makersacademy.acebook.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
@@ -118,7 +119,7 @@ public class RelationshipController {
     }
 
     @PostMapping("/users/{id}/requests/accept")
-    public RedirectView requestAccepted(@PathVariable("id") Long requesterId) {
+    public RedirectView requestAccepted(@PathVariable("id") Long requesterId, HttpServletRequest request) {
 
         DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
                 .getContext()
@@ -140,11 +141,12 @@ public class RelationshipController {
             relationshipRepository.save(relationship);
         }
 
-        return new RedirectView("/users/requests/pending");
+        String referer = request.getHeader("Referer");
+        return new RedirectView(referer != null ? referer : "/");
     }
 
     @PostMapping("/users/{id}/requests/reject")
-    public RedirectView requestRejected(@PathVariable("id") Long requesterId) {
+    public RedirectView requestRejected(@PathVariable("id") Long requesterId, HttpServletRequest request) {
 
         DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
                 .getContext()
@@ -165,7 +167,8 @@ public class RelationshipController {
             relationshipRepository.delete(relationship);
         }
 
-        return new RedirectView("/users/requests/pending");
+        String referer = request.getHeader("Referer");
+        return new RedirectView(referer != null ? referer : "/");
     }
 
     @PostMapping("/users/{id}/remove")
