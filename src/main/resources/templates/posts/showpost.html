@@ -88,7 +88,19 @@
 
                     <!-- like & comment counter -->
                     <div class="text-xs text-gray-500 flex items-center space-x-3">
-                        <span th:text="${#lists.size(post.likes)} + ' like(s)'" class="font-medium">0</span>
+                        <div class="relative group">
+                            <span class="font-medium cursor-pointer" th:text="${#lists.size(post.likes)} + ' like(s)'"></span>
+                            <div th:if="${#lists.size(post.likes) > 0}"
+                                 class="absolute left-1/2 -translate-x-1/2 mt-2 w-max
+                                    bg-gray-800 text-white text-xs rounded px-2 py-1
+                                    opacity-0 group-hover:opacity-100 transition-opacity duration-200
+                                    pointer-events-none z-50 shadow-lg">
+                                <ul>
+                                    <li th:each="like : ${post.likes}"
+                                                            th:text="${like.user.username}"></li>
+                                </ul>
+                            </div>
+                        </div>
                         <span th:text="${#lists.size(post.comment)} + ' comment(s)'" class="font-medium">0</span>
                     </div>
                 </div>
@@ -137,10 +149,24 @@
                                 </form>
 
                                 <!-- Like counter -->
-                                <span class="text-xs text-gray-500">
-                                    <span th:text="${#lists.size(singleComment.likes)}"></span> like(s)
-                                </span>
+                                <div class="relative group">
+                                    <span class="text-xs text-gray-500 font-medium cursor-pointer">
+                                        <span th:text="${#lists.size(singleComment.likes)}"></span> like(s)
+                                    </span>
+
+                                        <div th:if="${#lists.size(singleComment.likes) > 0}"
+                                             class="absolute left-1/2 -translate-x-1/2 mt-2 w-max
+                                                    bg-gray-800 text-white text-xs rounded px-2 py-1
+                                                    opacity-0 group-hover:opacity-100 transition-opacity duration-200
+                                                    pointer-events-none z-50 shadow-lg">
+                                            <ul>
+                                                <li th:each="like : ${singleComment.likes}"
+                                                                th:text="${like.user.username}"></li>
+                                            </ul>
+                                        </div>
+                                </div>
                             </div>
+                        </div>
 
 
                             <!-- check whether a user is allowed to edit a post -->
