@@ -26,8 +26,10 @@
                         <i data-lucide="search" class="w-4 h-4 text-gray-500"></i>
                         <input type="text"
                                name="query"
+                               th:value="${query} ? ''"
                                class="grow placeholder-gray-500 bg-transparent"
-                               placeholder="Search AceBook" />
+                               placeholder="Search AceBook"
+                                aria-label="Search AceBook" />
                     </label>
                 </form>
             </div>

@@ -1,73 +1,111 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      data-theme="light">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Post</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.2/dist/full.min.css" rel="stylesheet" type="text/css" />
-    <!-- lucide icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 
-<body class="bg-gray-100 min-h-screen flex flex-col" data-theme="light">
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
 <th:block th:replace="fragments/layout :: navbar"></th:block>
 
-<main class="bg-gray-100 flex-grow flex justify-center items-start pt-8 pb-8">
-<h2>Edit Post</h2>
+<main class="flex-grow flex justify-center items-start pt-8 pb-8 px-4">
+    <div class="w-full max-w-xl">
 
-<!--form for image upload-->
-<form th:action="@{'/posts/' + ${post.id} + '/update'}"
-      method="post"
-      enctype="multipart/form-data">
+        <div class="card w-full bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
 
-    <!--this is the editable text field-->
-    <label for="content">Content:</label><br>
-    <textarea id="content"
-              name="content"
-              rows="5"
-              cols="50"
-              th:text="${post.content}">
-    </textarea>
+            <div class="h-2 bg-gradient-to-r from-blue-500 to-sky-400"></div>
 
-    <br><br>
+            <div class="card-body p-6">
 
-    <!--this shows current image (only if exists)-->
-    <div th:if="${post.imagePath != null}">
-        <p>Current Image:</p>
+                <div class="mb-4">
+                    <h2 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                        <i data-lucide="pencil" class="w-6 h-6 text-blue-500"></i>
+                        Edit Post
+                    </h2>
+                    <p class="text-sm text-gray-500 mt-1">Update your content or change your image.</p>
+                </div>
 
-        <img th:src="${post.imagePath}"
-             alt="Post image"
-             style="max-width:250px; display:block; margin-bottom:10px;"/>
+                <form th:action="@{'/posts/' + ${post.id} + '/update'}"
+                      method="post"
+                      enctype="multipart/form-data"
+                      class="space-y-6">
 
-        <!--this removes image checkbox-->
-        <label>
-            <input type="checkbox" name="removeImage">
-            Remove this image
-        </label>
+                    <div class="form-control">
+                        <label class="label" for="content">
+                            <span class="label-text font-semibold">Post Content</span>
+                        </label>
+                        <textarea id="content"
+                                  name="content"
+                                  th:text="${post.content}"
+                                  class="textarea textarea-bordered h-32 text-base focus:border-blue-500"
+                                  placeholder="What's on your mind?"></textarea>
+                    </div>
 
-        <br><br>
+                    <div th:if="${post.imagePath != null}" class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <label class="label pt-0">
+                            <span class="label-text font-semibold text-gray-700">Current Image</span>
+                        </label>
+
+                        <div class="relative group">
+                            <img th:src="${post.imagePath}"
+                                 alt="Current post image"
+                                 class="rounded-lg w-full object-cover max-h-64 border border-gray-300 shadow-sm" />
+                        </div>
+
+                        <div class="form-control mt-3">
+                            <label class="cursor-pointer label justify-start gap-3">
+                                <input type="checkbox" name="removeImage" class="checkbox checkbox-error checkbox-sm" />
+                                <span class="label-text text-red-600 font-medium">Remove this image</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-control w-full">
+                        <label class="label" for="image">
+                            <span class="label-text font-semibold flex items-center">
+                                <i data-lucide="image" class="w-4 h-4 mr-2 text-gray-500"></i>
+                                Upload New Image
+                            </span>
+                        </label>
+                        <input type="file"
+                               name="image"
+                               id="image"
+                               accept="image/*"
+                               class="file-input file-input-bordered file-input-primary w-full" />
+                        <label class="label">
+                            <span class="label-text-alt text-gray-500">Optional: Overwrites current image if not removed.</span>
+                        </label>
+                    </div>
+
+                    <div class="text-xs text-gray-400 text-center" th:if="${post.editedAt != null}">
+                        Last edited: <span th:text="${#temporals.format(post.editedAt, 'dd MMM yyyy HH:mm')}"></span>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-2">
+                        <a th:href="@{/posts}" class="btn btn-ghost">Cancel</a>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i data-lucide="save" class="w-4 h-4 mr-1"></i>
+                            Save Changes
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
     </div>
-
-    <!--this is where we  upload a new image-->
-    <div>
-        <label for="image">Upload a new image (optional):</label><br>
-        <input type="file" name="image" id="image" accept="image/*">
-    </div>
-
-    <br>
-
-    <!--Save button-->
-    <button type="submit">Save Changes</button>
-</form>
-
-<!--this shows last edited timestamp-->
-<p th:if="${post.editedAt != null}">
-    Last edited on:
-    <span th:text="${#temporals.format(post.editedAt, 'dd MMM yyyy HH:mm')}"></span>
-</p>
-
-<br>
-
-<a th:href="@{/posts}">Cancel</a>
 </main>
+
+<script>
+    lucide.createIcons();
+</script>
+
 </body>
 </html>

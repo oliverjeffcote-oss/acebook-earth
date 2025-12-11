@@ -24,13 +24,8 @@ import org.springframework.web.servlet.view.RedirectView;
 
 import java.io.IOException;
 import java.nio.file.*;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 @Controller
 public class PostsController {
@@ -71,42 +66,6 @@ public class PostsController {
         return "posts/index";
     }
 
-//    private String saveImageToUploads(MultipartFile imageFile) {
-//        try {
-//            String uploadDir = "uploads";
-//            Files.createDirectories(Paths.get(uploadDir));
-//
-//            String originalFilename = imageFile.getOriginalFilename();
-//            String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-//            String filename = UUID.randomUUID() + extension;
-//
-//            Path destination = Paths.get(uploadDir).resolve(filename);
-//            Files.copy(imageFile.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
-//
-//            return "/uploads/" + filename;
-//
-//        } catch (IOException e) {
-//            throw new RuntimeException("Failed to save uploaded image", e);
-//        }
-//    }
-
-//    private void deleteFileFromUploads(String imagePath) {
-//        try {
-//            // Convert "/uploads/abc.jpg" → "uploads/abc.jpg"
-//            String relativePath = imagePath.replaceFirst("/", "");
-//            Path filePath = Paths.get(relativePath);
-//
-//            if (Files.exists(filePath)) {
-//                Files.delete(filePath);
-//            }
-//
-//        } catch (IOException e) {
-//            throw new RuntimeException("Failed to delete image file", e);
-//        }
-//    }
-
-
-
     @PostMapping("/posts")
     public RedirectView create(@ModelAttribute Post post,
                                 @RequestParam(value = "image", required = false)
@@ -124,8 +83,6 @@ public class PostsController {
 
         // Optional image upload handling
         if (imageFile != null && !imageFile.isEmpty()) {
-            String uploadDir = "uploads"; // Folder relative to project root
-
             try {
                 String newPath = s3Service.uploadImage(imageFile);
                 post.setImagePath(newPath);
@@ -193,15 +150,15 @@ public class PostsController {
         post.setEditedAt(LocalDateTime.now());
 //         If user checks "Remove image"
         if (removeImage != null && post.getImagePath() != null) {
-//            deleteFileFromUploads(post.getImagePath());
+            s3Service.deleteImage(post.getImagePath());
             post.setImagePath(null);
         }
         // If user uploads a new image
         if (newImage != null && !newImage.isEmpty()) {
             // Delete old image if it exists
-//            if (post.getImagePath() != null) {
-//                deleteFileFromUploads(post.getImagePath());
-//            }
+            if (post.getImagePath() != null) {
+                s3Service.deleteImage(post.getImagePath());
+            }
             // Save new image
             try {
                 String newPath = s3Service.uploadImage(newImage);
@@ -217,9 +174,9 @@ public class PostsController {
     @PostMapping("/posts/{id}/delete")
     public RedirectView deletePost(@PathVariable Long id) {
         Post post = postRepository.findById(id).orElseThrow();
-//        if (post.getImagePath() != null) {
-//            deleteFileFromUploads(post.getImagePath());
-//        }
+        if (post.getImagePath() != null) {
+            s3Service.deleteImage(post.getImagePath());
+        }
 
         postRepository.deleteById(id);
         return new RedirectView("/posts");
