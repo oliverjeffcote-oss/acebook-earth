@@ -9,95 +9,210 @@
 <!-- ======================= -->
 <div th:fragment="navbar">
 
-    <!-- Logged in navbar -->
-    <div sec:authorize="isAuthenticated()" class="navbar-sticky bg-white shadow-lg border-b border-gray-200 z">
+    <!-- ======================= -->
+    <!--     LOGGED-IN NAVBAR    -->
+    <!-- ======================= -->
+    <div sec:authorize="isAuthenticated()"
+         class="sticky top-0 bg-white shadow-lg border-b border-gray-200 z-50">
         <div class="navbar w-full max-w-7xl mx-auto px-4">
 
-            <!-- left section: logo + search -->
-            <div class="navbar-start">
-
-                <a href="/posts" class="btn btn-ghost text-2xl font-extrabold text-blue-600 mr-4">AceBook</a>
-
+            <!-- left section: logo + desktop search + chat -->
+            <div class="navbar-start gap-2">
+                <!-- Home (works at all sizes) -->
+                <a href="/posts" class="btn btn-ghost text-2xl font-extrabold text-blue-600 mr-2">
+                    AceBook
+                </a>
 
                 <!-- Desktop search form -->
                 <form th:action="@{/users/search}"
                       method="get"
                       class="hidden lg:flex">
                     <label class="input input-sm input-bordered flex items-center gap-2 rounded-full navbar-search-input">
-                        <i data-lucide="search" class="w-4 h-4 text-gray-500"></i>
+                        <i data-lucide="search" class="w-4 h-4 text-gray-500" aria-hidden="true"></i>
                         <input type="text"
                                name="query"
-                               th:value="${query} ? ''"
+                               th:value="${query} ?: ''"
                                class="grow placeholder-gray-500 bg-transparent"
                                placeholder="Search AceBook"
-                                aria-label="Search AceBook" />
+                               aria-label="Search AceBook" />
                     </label>
                 </form>
 
-                <a href="/chat" class="btn btn-ghost btn-circle hover:bg-blue-50"><i data-lucide="message-circle" ></i></a>
+                <!-- Chat shortcut (visible on all sizes) -->
+                <a href="/chat"
+                   class="btn btn-ghost btn-circle hover:bg-blue-50"
+                   aria-label="Chat">
+                    <i data-lucide="message-circle" class="w-5 h-5" aria-hidden="true"></i>
+                </a>
             </div>
 
+            <!-- centre currently unused but kept for layout -->
             <div class="navbar-center flex flex-grow justify-center lg:flex-none"></div>
 
-            <!-- user actions -->
+            <!-- right section: greeting, avatar, hamburger -->
             <div class="navbar-end space-x-2">
 
-                <!-- mobile search (icon only for now) -->
-                <button class="btn btn-ghost btn-circle lg:hidden">
-                    <i data-lucide="search" class="w-5 h-5"></i>
-                </button>
-
-                <span class="hidden md:inline-block text-sm text-gray-500 mr-2">
-                    Hi, <span sec:authentication="principal.attributes['currentUser']"
-                              th:text="${#authentication.principal.attributes['preferred_username']}">User</span>
+                <!-- greeting (hidden on very small screens) -->
+                <span class="hidden md:inline-block text-sm text-gray-500 mr-1">
+                    Hi,
+                    <span th:text="${#authentication.principal.attributes['preferred_username']}">User</span>
                 </span>
 
-                <!-- avatar dropdown -->
-                <div class="dropdown dropdown-end">
+                <!-- avatar dropdown (desktop + tablet) -->
+                <div class="dropdown dropdown-end hidden sm:inline-block">
                     <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
                         <div class="w-10 rounded-full ring ring-gray-300 overflow-hidden">
 
                             <img th:if="${user?.imagePath != null}"
                                  th:src="${user.imagePath}"
-                                 class="object-cover w-full h-full"/>
+                                 class="object-cover w-full h-full"
+                                 alt="User Avatar" />
 
                             <img th:if="${user?.imagePath == null and #authentication?.principal?.attributes != null and #authentication.principal.attributes['picture'] != null}"
                                  th:src="${#authentication.principal.attributes['picture']}"
-                                 class="object-cover w-full h-full"/>
-
-                            <img th:if="${user?.imagePath == null and (#authentication?.principal?.attributes == null or #authentication.principal.attributes['picture'] == null)}"
-                                 th:src="'https://placehold.co/40x40/4c6ef5/ffffff?text=' + ${user?.username != null ? #strings.substring(user.username,0,1) : 'U'}"
+                                 class="object-cover w-full h-full"
                                  alt="User Avatar" />
 
-<!--                            <img src="https://placehold.co/40x40/374151/ffffff?text=Me" alt="User Avatar"/>-->
+                            <img th:if="${user?.imagePath == null and (#authentication?.principal?.attributes == null or #authentication.principal.attributes['picture'] == null)}"
+                                 th:src="@{|https://placehold.co/40x40/4c6ef5/ffffff?text=${user != null && user.username != null ? #strings.substring(user.username,0,1) : 'U'}|}"
+                                 class="object-cover w-full h-full"
+                                 alt="User Avatar" />
                         </div>
                     </div>
 
-                    <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-                        <li><a th:href="@{/users/profile}">Profile</a></li>
-                        <li><a th:href="@{/users/requests/pending}">Friend Requests</a></li>
-                        <li><a href="/logout">Logout</a></li>
+                    <ul tabindex="0"
+                        class="menu menu-sm dropdown-content mt-3 z-[60] p-2 shadow bg-base-100 rounded-box w-52">
+                        <!-- Home (same as logo) -->
+                        <li>
+                            <a href="/posts">
+                                <i data-lucide="home" class="w-4 h-4 mr-2" aria-hidden="true"></i>
+                                Home
+                            </a>
+                        </li>
+
+                        <!-- Friends (same as mobile friends link) -->
+                        <li>
+                            <a th:href="@{'/users/' + ${user.id} + '/friends'}">
+                                <i data-lucide="users" class="w-4 h-4 mr-2" aria-hidden="true"></i>
+                                Friends
+                            </a>
+                        </li>
+
+                        <!-- Friend Requests -->
+                        <li>
+                            <a th:href="@{/users/requests/pending}">
+                                <i data-lucide="user-plus" class="w-4 h-4 mr-2" aria-hidden="true"></i>
+                                Friend Requests
+                            </a>
+                        </li>
+
+                        <!-- Chat (same as chat icon) -->
+                        <li>
+                            <a href="/chat">
+                                <i data-lucide="message-circle" class="w-4 h-4 mr-2" aria-hidden="true"></i>
+                                Chat
+                            </a>
+                        </li>
+
+                        <!-- Profile -->
+                        <li>
+                            <a th:href="@{/users/profile}">
+                                <i data-lucide="user" class="w-4 h-4 mr-2" aria-hidden="true"></i>
+                                Profile
+                            </a>
+                        </li>
+
+                        <!-- Logout -->
+                        <li>
+                            <a href="/logout" class="text-red-600">
+                                <i data-lucide="log-out" class="w-4 h-4 mr-2" aria-hidden="true"></i>
+                                Logout
+                            </a>
+                        </li>
                     </ul>
                 </div>
+
+                <!-- mobile hamburger menu (shows on all < lg) -->
+                <button id="mobile-menu-toggle-auth"
+                        type="button"
+                        class="btn btn-ghost btn-circle lg:hidden"
+                        aria-label="Open menu">
+                    <i data-lucide="menu" class="w-5 h-5" aria-hidden="true"></i>
+                </button>
             </div>
+        </div>
+
+        <!-- Mobile menu for logged-in users -->
+        <div id="mobile-menu-auth"
+             class="w-full bg-white border-t border-gray-200 px-4 py-3 space-y-3 lg:hidden hidden">
+
+            <!-- Mobile search -->
+            <form th:action="@{/users/search}"
+                  method="get"
+                  class="w-full">
+                <label class="input input-sm input-bordered flex items-center gap-2 rounded-full w-full">
+                    <i data-lucide="search" class="w-4 h-4 text-gray-500" aria-hidden="true"></i>
+                    <input type="text"
+                           name="query"
+                           th:value="${query} ?: ''"
+                           class="grow placeholder-gray-500 bg-transparent"
+                           placeholder="Search AceBook"
+                           aria-label="Search AceBook (mobile)" />
+                </label>
+            </form>
+
+            <!-- Mobile nav links (same set as desktop dropdown) -->
+            <nav class="flex flex-col space-y-1 text-sm">
+                <a href="/posts" class="btn btn-ghost justify-start">
+                    <i data-lucide="home" class="w-4 h-4 mr-2" aria-hidden="true"></i>
+                    Home
+                </a>
+                <a th:href="@{'/users/' + ${user.id} + '/friends'}" class="btn btn-ghost justify-start">
+                    <i data-lucide="users" class="w-4 h-4 mr-2" aria-hidden="true"></i>
+                    Friends
+                </a>
+                <a th:href="@{/users/requests/pending}" class="btn btn-ghost justify-start">
+                    <i data-lucide="user-plus" class="w-4 h-4 mr-2" aria-hidden="true"></i>
+                    Friend Requests
+                </a>
+                <a href="/chat" class="btn btn-ghost justify-start">
+                    <i data-lucide="message-circle" class="w-4 h-4 mr-2" aria-hidden="true"></i>
+                    Chat
+                </a>
+                <a th:href="@{/users/profile}" class="btn btn-ghost justify-start">
+                    <i data-lucide="user" class="w-4 h-4 mr-2" aria-hidden="true"></i>
+                    Profile
+                </a>
+                <a href="/logout" class="btn btn-ghost justify-start text-red-600">
+                    <i data-lucide="log-out" class="w-4 h-4 mr-2" aria-hidden="true"></i>
+                    Logout
+                </a>
+            </nav>
         </div>
     </div>
 
-    <!-- Logged out navbar -->
-    <div sec:authorize="isAnonymous()" class="bg-white shadow-lg border-b border-gray-200">
+    <!-- ======================= -->
+    <!--    LOGGED-OUT NAVBAR    -->
+    <!-- ======================= -->
+    <div sec:authorize="isAnonymous()"
+         class="sticky top-0 bg-white shadow-lg border-b border-gray-200 z-50">
         <div class="navbar w-full max-w-7xl mx-auto px-4">
 
-            <div class="navbar-start">
-                <a href="/posts" class="btn btn-ghost text-2xl font-extrabold text-blue-600 mr-4">AceBook</a>
+            <div class="navbar-start gap-2">
+                <!-- Home -->
+                <a href="/posts" class="btn btn-ghost text-2xl font-extrabold text-blue-600 mr-2">
+                    AceBook
+                </a>
 
                 <!-- Desktop search form for anonymous users -->
                 <form th:action="@{/users/search}"
                       method="get"
                       class="hidden lg:flex">
                     <label class="input input-sm input-bordered flex items-center gap-2 rounded-full navbar-search-input">
-                        <i data-lucide="search" class="w-4 h-4 text-gray-500"></i>
+                        <i data-lucide="search" class="w-4 h-4 text-gray-500" aria-hidden="true"></i>
                         <input type="text"
                                name="query"
+                               th:value="${query} ?: ''"
                                class="grow placeholder-gray-500 bg-transparent"
                                placeholder="Search AceBook" />
                     </label>
@@ -107,18 +222,74 @@
             <div class="navbar-center flex flex-grow justify-center lg:flex-none"></div>
 
             <div class="navbar-end space-x-2">
-
-                <!-- mobile search (icon only for now) -->
-                <button class="btn btn-ghost btn-circle lg:hidden">
-                    <i data-lucide="search" class="w-5 h-5"></i>
-                </button>
-
-                <a href="/login" class="btn btn-sm btn-primary rounded-full hover:bg-blue-700">
+                <!-- Desktop sign in button -->
+                <a href="/login" class="btn btn-sm btn-primary rounded-full hover:bg-blue-700 hidden lg:inline-flex">
                     Sign In
                 </a>
+
+                <!-- Mobile hamburger (all < lg) -->
+                <button id="mobile-menu-toggle-anon"
+                        type="button"
+                        class="btn btn-ghost btn-circle lg:hidden"
+                        aria-label="Open menu">
+                    <i data-lucide="menu" class="w-5 h-5" aria-hidden="true"></i>
+                </button>
             </div>
         </div>
+
+        <!-- Mobile menu for anonymous users -->
+        <div id="mobile-menu-anon"
+             class="w-full bg-white border-t border-gray-200 px-4 py-3 space-y-3 lg:hidden hidden">
+
+            <!-- Mobile search -->
+            <form th:action="@{/users/search}"
+                  method="get"
+                  class="w-full">
+                <label class="input input-sm input-bordered flex items-center gap-2 rounded-full w-full">
+                    <i data-lucide="search" class="w-4 h-4 text-gray-500" aria-hidden="true"></i>
+                    <input type="text"
+                           name="query"
+                           th:value="${query} ?: ''"
+                           class="grow placeholder-gray-500 bg-transparent"
+                           placeholder="Search AceBook" />
+                </label>
+            </form>
+
+            <!-- Same options as desktop (for anon) -->
+            <nav class="flex flex-col space-y-1 text-sm">
+                <a href="/posts" class="btn btn-ghost justify-start">
+                    <i data-lucide="home" class="w-4 h-4 mr-2" aria-hidden="true"></i>
+                    Home
+                </a>
+                <a href="/login" class="btn btn-ghost justify-start">
+                    <i data-lucide="log-in" class="w-4 h-4 mr-2" aria-hidden="true"></i>
+                    Sign In
+                </a>
+            </nav>
+        </div>
     </div>
+
+    <!-- ======================= -->
+    <!--   MOBILE MENU SCRIPT    -->
+    <!-- ======================= -->
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function () {
+            function setupToggle(toggleId, menuId) {
+                var toggle = document.getElementById(toggleId);
+                var menu = document.getElementById(menuId);
+                if (!toggle || !menu) return;
+
+                toggle.addEventListener('click', function () {
+                    menu.classList.toggle('hidden');
+                });
+            }
+
+            setupToggle('mobile-menu-toggle-auth', 'mobile-menu-auth');
+            setupToggle('mobile-menu-toggle-anon', 'mobile-menu-anon');
+        });
+        /*]]>*/
+    </script>
 
 </div>
 
