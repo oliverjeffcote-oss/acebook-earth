@@ -33,8 +33,21 @@
                 <div class="flex items-center mb-3">
                     <div class="avatar mr-3">
                         <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
-                            <img th:src="@{'https://ui-avatars.com/api/?name=' + ${post.user.username} + '&background=random&color=fff'}"
-                                 alt="User Avatar 1" />
+                            <!-- avatar -->
+                            <img th:if="${post.user?.imagePath != null}"
+                                 th:src="${post.user.imagePath}"
+                                 class="object-cover w-full h-full"/>
+
+                            <img th:if="${post.user?.imagePath == null and #authentication?.principal?.attributes != null and #authentication.principal.attributes['picture'] != null}"
+                                 th:src="'https://placehold.co/40x40/4c6ef5/ffffff?text=' + ${post.user?.username != null ? #strings.substring(post.user.username,0,2) : 'U'}"
+                                 class="object-cover w-full h-full"/>
+
+                            <img th:if="${post.user?.imagePath == null and (#authentication?.principal?.attributes == null or #authentication.principal.attributes['picture'] == null)}"
+                                 th:src="'https://placehold.co/40x40/4c6ef5/ffffff?text=' + ${post.user?.username != null ? #strings.substring(post.user.username,0,2) : 'U'}"
+                                 alt="User Avatar" />
+
+<!--                            <img th:src="@{'https://ui-avatars.com/api/?name=' + ${post.user.username} + '&background=random&color=fff'}"-->
+<!--                                  alt="User Avatar 1" />-->
                         </div>
                     </div>
                     <div>
@@ -97,7 +110,17 @@
                     <div class="flex items-start gap-2">
                         <div class="avatar shrink-0">
                             <div class="w-7 h-7 rounded-full bg-yellow-400">
-                                <img th:src="@{'https://ui-avatars.com/api/?name=' + ${singleComment.user.username} + '&background=random&color=fff'}"
+
+                                <img th:if="${singleComment.user?.imagePath != null}"
+                                     th:src="${singleComment.user.imagePath}"
+                                     class="object-cover w-full h-full"/>
+
+                                <img th:if="${singleComment.user?.imagePath == null and #authentication?.principal?.attributes != null and #authentication.principal.attributes['picture'] != null}"
+                                     th:src="${#authentication.principal.attributes['picture']}"
+                                     class="object-cover w-full h-full"/>
+
+                                <img th:if="${singleComment.user?.imagePath == null and (#authentication?.principal?.attributes == null or #authentication.principal.attributes['picture'] == null)}"
+                                     th:src="'https://placehold.co/40x40/4c6ef5/ffffff?text=' + ${singleComment.user?.username != null ? #strings.substring(singleComment.user.username,0,1) : 'U'}"
                                      alt="Commenter Avatar" />
                             </div>
                         </div>
@@ -164,7 +187,19 @@
                 <form action="#" th:action="@{/posts/{id}/comment(id=${post.id})}" method="POST" class="mt-1.5 flex items-center space-x-2">
                     <div class="avatar">
                         <div class="w-7 h-7 rounded-full bg-gray-400">
-                            <img src="https://placehold.co/28x28/374151/ffffff?text=Me" alt="My Avatar" />
+                            <!-- avatar for user -->
+                            <img th:if="${user?.imagePath != null}"
+                                 th:src="${user.imagePath}"
+                                 class="object-cover w-full h-full"/>
+
+                            <img th:if="${user?.imagePath == null and #authentication?.principal?.attributes != null and #authentication.principal.attributes['picture'] != null}"
+                                 th:src="${#authentication.principal.attributes['picture']}"
+                                 class="object-cover w-full h-full"/>
+
+                            <img th:if="${user?.imagePath == null and (#authentication?.principal?.attributes == null or #authentication.principal.attributes['picture'] == null)}"
+                                 th:src="'https://placehold.co/40x40/4c6ef5/ffffff?text=' + ${user?.username != null ? #strings.substring(user.username,0,1) : 'U'}"
+                                 alt="My Avatar" />
+<!--                            <img src="https://placehold.co/28x28/374151/ffffff?text=Me" alt="My Avatar" />-->
                         </div>
                     </div>
                     <div class="input input-sm input-bordered flex items-center gap-2 flex-grow rounded-full bg-gray-100 border-gray-200">

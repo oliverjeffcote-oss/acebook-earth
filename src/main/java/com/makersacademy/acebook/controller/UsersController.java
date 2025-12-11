@@ -84,6 +84,18 @@ public class UsersController {
             model.addAttribute("query", "");
             model.addAttribute("results", java.util.Collections.emptyList());
             model.addAttribute("suggestedUsers", java.util.Collections.emptyList());
+
+            DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
+                    .getContext()
+                    .getAuthentication()
+                    .getPrincipal();
+
+            String username = (String) principal.getAttributes().get("https://myapp.com/username");
+            User currentUser = userRepository.findUserByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User not found: " + username));
+
+            model.addAttribute("user", currentUser);
+
             return "users/searchresults";
         }
 
@@ -169,6 +181,17 @@ public class UsersController {
             model.addAttribute("friendshipStatuses", friendshipStatuses);
             model.addAttribute("loggedInUser", loggedInUser);
         }
+
+        DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        String username = (String) principal.getAttributes().get("https://myapp.com/username");
+        User currentUser = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+
+        model.addAttribute("user", currentUser);
 
         return "users/searchresults";
     }
