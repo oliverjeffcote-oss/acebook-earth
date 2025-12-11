@@ -16,12 +16,15 @@
 
 <th:block th:replace="fragments/layout :: navbar"></th:block>
 
-<form th:action="@{/}" method="get">
-    <button type="submit" class="btn btn-primary">↩️ Back to Posts</button>
-</form>
-
 <main class="flex-grow flex justify-center items-start pt-8 pb-8 px-4">
-    <div class="w-full max-w-2xl">
+
+    <div class="w-full max-w-2xl relative">
+
+        <div class="absolute -left-16 top-5 hidden lg:block">
+            <a th:href="@{/}" class="btn btn-ghost btn-circle text-gray-500 hover:bg-gray-200" title="Back to Posts">
+                <i data-lucide="arrow-left" class="w-6 h-6"></i>
+            </a>
+        </div>
 
         <div class="card w-full bg-white border border-gray-200 rounded-xl shadow-lg">
 
