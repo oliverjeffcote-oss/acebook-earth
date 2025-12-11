@@ -84,7 +84,8 @@ public class RelationshipController {
         ModelAndView modelAndView = new ModelAndView("/users/friends");
 
         modelAndView.addObject("friends", friends); // add the friend user accounts to page
-        modelAndView.addObject("user", user); // add currently logged in user
+        modelAndView.addObject("user", user); // add currently logged-in user
+        modelAndView.addObject("profileOwner", profileOwner); // whose friends we're viewing
 
         return modelAndView;
     }

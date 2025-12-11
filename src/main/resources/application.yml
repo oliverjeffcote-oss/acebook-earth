@@ -1,4 +1,8 @@
 spring:
+  servlet:
+    multipart:
+      max-file-size: 1MB
+      max-request-size: 2MB
   config:
     import: optional:file:.env[.properties]
   cloud:
