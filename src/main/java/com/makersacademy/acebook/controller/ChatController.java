@@ -117,6 +117,7 @@ public class ChatController {
                 saved.getSender().getUsername(),
                 saved.getRecipient().getUsername(),
                 saved.getTimestamp().toString()
+
         );
 
         messagingTemplate.convertAndSendToUser(recipient.getUsername(), "user/queue/messages", outgoingDto);
