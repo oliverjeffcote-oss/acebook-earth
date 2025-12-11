@@ -34,7 +34,7 @@ public class PostsController {
     private PostRepository postRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    UserRepository userRepository;
 
     @Autowired
     private CommentRepository commentRepository;
@@ -45,6 +45,18 @@ public class PostsController {
     @GetMapping("/posts")
 
     public String index(@RequestParam(defaultValue = "0") int page, Model model) {
+        DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        String username = (String) principal.getAttributes().get("https://myapp.com/username");
+
+        User currentUser = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+
+        model.addAttribute("user", currentUser);
+
         Pageable pageable = PageRequest.of(page, 10);
         Page<Post> posts = postRepository.getPostsNewestFirst(pageable);
         model.addAttribute("posts", posts.getContent());
@@ -90,6 +102,18 @@ public class PostsController {
         List<Comment> comments = commentRepository.getCommentsNewestFirst(post);
         model.addAttribute("post", post);
         model.addAttribute("comments", comments);
+
+        DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        String username = (String) principal.getAttributes().get("https://myapp.com/username");
+        User currentUser = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+
+        model.addAttribute("user", currentUser);
+
         return "posts/showpost";
     }
 
@@ -98,6 +122,18 @@ public class PostsController {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
         model.addAttribute("post", post);
+
+        DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        String username = (String) principal.getAttributes().get("https://myapp.com/username");
+        User currentUser = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+
+        model.addAttribute("user", currentUser);
+
         return "posts/edit";
     }
 
