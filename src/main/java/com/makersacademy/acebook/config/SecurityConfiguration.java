@@ -30,7 +30,10 @@ public class SecurityConfiguration {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/", "/images/**").permitAll()
+                        .requestMatchers("/", "/login", "/css/**", "/images/**", "/error").permitAll()
+                        // Require login for profile + user
+                        .requestMatchers("/users/**").authenticated()
+                        .requestMatchers("/posts/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2

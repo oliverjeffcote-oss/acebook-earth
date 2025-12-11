@@ -9,57 +9,10 @@
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.2/dist/full.min.css" rel="stylesheet" type="text/css" />
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-gray-100" data-theme="light">
+<body class="bg-gray-100 min-h-screen flex flex-col" data-theme="light">
+<th:block th:replace="fragments/layout :: navbar"></th:block>
 
-<div sec:authorize="isAuthenticated()" class="navbar-sticky bg-white shadow-lg border-b border-gray-200 z-50 relative">
-    <div class="navbar w-full max-w-7xl mx-auto px-4">
-        <div class="navbar-start">
-            <a href="/posts" class="btn btn-ghost text-2xl font-extrabold text-blue-600 mr-4">AceBook</a>
-            <div class="hidden lg:flex">
-                <label class="input input-sm input-bordered flex items-center gap-2 rounded-full navbar-search-input">
-                    <i data-lucide="search" class="w-4 h-4 text-gray-500"></i>
-                    <input type="text" class="grow placeholder-gray-500 bg-transparent" placeholder="Search AceBook" />
-                </label>
-            </div>
-        </div>
-
-        <div class="navbar-center flex flex-grow justify-center lg:flex-none"></div>
-
-        <div class="navbar-end space-x-2">
-            <button class="btn btn-ghost btn-circle lg:hidden">
-                <i data-lucide="search" class="w-5 h-5"></i>
-            </button>
-
-            <span class="hidden md:inline-block text-sm text-gray-500 mr-2">
-                Hi, <span sec:authentication="principal.attributes['email']">User</span>
-            </span>
-
-            <div class="dropdown dropdown-end">
-                <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
-                    <div class="w-10 rounded-full ring ring-gray-300">
-                        <img src="https://placehold.co/40x40/374151/ffffff?text=Me" alt="User Avatar" />
-                    </div>
-                </div>
-                <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-                    <li><a th:href="@{/users/profile}">Profile</a></li>
-                    <li><a href="/logout">Logout</a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div sec:authorize="isAnonymous()" class="bg-white shadow-lg border-b border-gray-200">
-    <div class="navbar w-full max-w-7xl mx-auto px-4">
-        <div class="navbar-start">
-            <a href="/posts" class="btn btn-ghost text-2xl font-extrabold text-blue-600 mr-4">AceBook</a>
-        </div>
-        <div class="navbar-end space-x-2">
-            <a href="/login" class="btn btn-sm btn-primary rounded-full hover:bg-blue-700">Sign In</a>
-        </div>
-    </div>
-</div>
-<main class="bg-gray-100 flex justify-center items-start pt-8 pb-8">
+<main class="bg-gray-100 flex-grow flex justify-center items-start pt-8 pb-8">
     <div class="w-full max-w-xl space-y-4">
 
         <div sec:authorize="isAuthenticated()" class="card bg-white border border-gray-200 rounded-lg shadow-md">
@@ -89,12 +42,17 @@
                                 <input type="file"
                                        name="image"
                                        accept="image/*"
-                                       class="file-input file-input-bordered file-input-xs w-full max-w-xs bg-gray-100 text-gray-500 rounded-full" />
+                                       class="file-input file-input-bordered file-input-xs w-full max-w-xs bg-gray-100 text-gray-500 rounded-full"
+                                       onchange="validateFileSize(this)"
+                                />
 
-                                <button type="submit" class="btn btn-primary btn-sm px-10 rounded-full h-6 min-h-0 mr-7">
+                                <button id="PostButton" type="submit" class="btn btn-primary btn-sm px-10 rounded-full h-6 min-h-0 mr-7">
                                     Post
                                 </button>
                             </div>
+                            <p id="file-error" class="text-red-500 text-xs p-0 pl-2 m-0 hidden">
+                                Max file size is 1MB.
+                            </p>
                         </div>
                     </div>
                 </form>
@@ -123,6 +81,9 @@
                                th:text="${postItem.user.username}">Username</a>
                             <p class="text-xs text-gray-500"
                                th:text="${#temporals.format(postItem.createdAt, 'dd MMM yyyy HH:mm')}">Date</p>
+                            <span th:if="${postItem.editedAt != null}" class="text-xs text-gray-500 ml-1">
+                                (edited)
+                            </span>
                         </div>
                     </div>
 
@@ -210,14 +171,6 @@
     </div>
 
         <div class="flex justify-center items-center gap-4 mt-8" th:if="${page.totalPages > 0}">
-
-<!--                <a th:href="@{/posts/{id}(id=${postItem.id})}">-->
-<!--                    View Replies • <span th:text="${#lists.size(postItem.comment)}"></span> replies-->
-<!--                </a>-->
-
-                </article>
-        </div>
-        <div class="join grid grid-cols-2 mt-6" th:if="${page.totalPages > 0}">
             <a th:if="${!page.first}"
                th:href="@{/posts(page=${currentPage - 1})}"
                class="btn btn-ghost btn-circle btn-sm text-gray-500 hover:text-blue-600 hover:bg-blue-200 bg-blue-100"
@@ -246,12 +199,35 @@
             </button>
         </div>
 
-        </div>
+    </div>
 
 </main>
 
 <script>
     lucide.createIcons();
+
+    function validateFileSize(input) {
+        const maxBytes = 1024 * 1024; // 1MB
+        const errorMsg = document.getElementById("file-error");
+        const postBtn = document.getElementById("PostButton");
+
+        if (input.files && input.files[0]) {
+            const fileSize = input.files[0].size;
+            if (fileSize > maxBytes) {
+                // CASE: File is too big
+                errorMsg.classList.remove("hidden"); // Show error text
+
+                input.value = "";                    // Clear the file input
+            } else {
+                // CASE: File is valid
+                errorMsg.classList.add("hidden");    // Hide error text
+
+            }
+            } else {
+            // CASE: User clicked Cancel or cleared input
+            errorMsg.classList.add("hidden");
+        }
+    }
 </script>
 </body>
 </html>

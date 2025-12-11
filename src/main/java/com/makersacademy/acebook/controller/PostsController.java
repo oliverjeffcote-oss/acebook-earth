@@ -7,6 +7,7 @@ import com.makersacademy.acebook.repository.LikeRepository;
 import com.makersacademy.acebook.repository.CommentRepository;
 import com.makersacademy.acebook.repository.PostRepository;
 import com.makersacademy.acebook.repository.UserRepository;
+import com.makersacademy.acebook.services.S3Service;
 import jakarta.validation.constraints.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -43,14 +44,10 @@ public class PostsController {
     @Autowired
     private CommentRepository commentRepository;
 
+    @Autowired
+    private S3Service s3Service;
+
     @GetMapping("/posts")
-//    public String index(@RequestParam(defaultValue="0") int page,Model model) {
-//        Pageable pageable = PageRequest.of(page, 10); ;
-//        Page<Post> posts = postRepository.getPostsNewestFirst(pageable);
-//        model.addAttribute("posts", posts.getContent());
-//        model.addAttribute("post", new Post());
-//        return "posts/index";
-//    }
 
     public String index(@RequestParam(defaultValue = "0") int page, Model model) {
         Pageable pageable = PageRequest.of(page, 10);
@@ -62,39 +59,39 @@ public class PostsController {
         return "posts/index";
     }
 
-    private String saveImageToUploads(MultipartFile imageFile) {
-        try {
-            String uploadDir = "uploads";
-            Files.createDirectories(Paths.get(uploadDir));
+//    private String saveImageToUploads(MultipartFile imageFile) {
+//        try {
+//            String uploadDir = "uploads";
+//            Files.createDirectories(Paths.get(uploadDir));
+//
+//            String originalFilename = imageFile.getOriginalFilename();
+//            String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+//            String filename = UUID.randomUUID() + extension;
+//
+//            Path destination = Paths.get(uploadDir).resolve(filename);
+//            Files.copy(imageFile.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
+//
+//            return "/uploads/" + filename;
+//
+//        } catch (IOException e) {
+//            throw new RuntimeException("Failed to save uploaded image", e);
+//        }
+//    }
 
-            String originalFilename = imageFile.getOriginalFilename();
-            String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-            String filename = UUID.randomUUID() + extension;
-
-            Path destination = Paths.get(uploadDir).resolve(filename);
-            Files.copy(imageFile.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
-
-            return "/uploads/" + filename;
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to save uploaded image", e);
-        }
-    }
-
-    private void deleteFileFromUploads(String imagePath) {
-        try {
-            // Convert "/uploads/abc.jpg" → "uploads/abc.jpg"
-            String relativePath = imagePath.replaceFirst("/", "");
-            Path filePath = Paths.get(relativePath);
-
-            if (Files.exists(filePath)) {
-                Files.delete(filePath);
-            }
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to delete image file", e);
-        }
-    }
+//    private void deleteFileFromUploads(String imagePath) {
+//        try {
+//            // Convert "/uploads/abc.jpg" → "uploads/abc.jpg"
+//            String relativePath = imagePath.replaceFirst("/", "");
+//            Path filePath = Paths.get(relativePath);
+//
+//            if (Files.exists(filePath)) {
+//                Files.delete(filePath);
+//            }
+//
+//        } catch (IOException e) {
+//            throw new RuntimeException("Failed to delete image file", e);
+//        }
+//    }
 
 
 
@@ -118,27 +115,8 @@ public class PostsController {
             String uploadDir = "uploads"; // Folder relative to project root
 
             try {
-                // Ensures upload directory exists
-                Files.createDirectories(Paths.get(uploadDir));
-
-                String originalFilename = StringUtils.cleanPath(imageFile.getOriginalFilename());
-                String extension = "";
-
-                int dotIndex = originalFilename.lastIndexOf('.');
-                if(dotIndex >= 0) {
-                    extension = originalFilename.substring(dotIndex); // Includes the dot
-                }
-
-                // Generate a unique filename to avoid collisions
-                String filename = UUID.randomUUID().toString() + extension;
-                Path destination = Paths.get(uploadDir).resolve(filename);
-
-                // Save the file to disk
-                Files.copy(imageFile.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
-
-                // Store the web accessible path in the post
-                post.setImagePath("/uploads/" + filename);
-
+                String newPath = s3Service.uploadImage(imageFile);
+                post.setImagePath(newPath);
             } catch (IOException e) {
                 throw new RuntimeException("Failed to store uploaded file.", e);
             }
@@ -177,20 +155,24 @@ public class PostsController {
                 .orElseThrow(() -> new RuntimeException("Post not found"));
         post.setContent(updateContent);
         post.setEditedAt(LocalDateTime.now());
-        // If user checks "Remove image"
+//         If user checks "Remove image"
         if (removeImage != null && post.getImagePath() != null) {
-            deleteFileFromUploads(post.getImagePath());
+//            deleteFileFromUploads(post.getImagePath());
             post.setImagePath(null);
         }
         // If user uploads a new image
         if (newImage != null && !newImage.isEmpty()) {
             // Delete old image if it exists
-            if (post.getImagePath() != null) {
-                deleteFileFromUploads(post.getImagePath());
-            }
+//            if (post.getImagePath() != null) {
+//                deleteFileFromUploads(post.getImagePath());
+//            }
             // Save new image
-            String newPath = saveImageToUploads(newImage);
-            post.setImagePath(newPath);
+            try {
+                String newPath = s3Service.uploadImage(newImage);
+                post.setImagePath(newPath);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to update image file.", e);
+            }
         }
         postRepository.save(post);
         return new RedirectView("/posts");
@@ -199,9 +181,9 @@ public class PostsController {
     @PostMapping("/posts/{id}/delete")
     public RedirectView deletePost(@PathVariable Long id) {
         Post post = postRepository.findById(id).orElseThrow();
-        if (post.getImagePath() != null) {
-            deleteFileFromUploads(post.getImagePath());
-        }
+//        if (post.getImagePath() != null) {
+//            deleteFileFromUploads(post.getImagePath());
+//        }
 
         postRepository.deleteById(id);
         return new RedirectView("/posts");
