@@ -4,6 +4,7 @@ import com.makersacademy.acebook.model.Relationship;
 import com.makersacademy.acebook.model.User;
 import com.makersacademy.acebook.repository.RelationshipRepository;
 import com.makersacademy.acebook.repository.UserRepository;
+import com.makersacademy.acebook.services.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
@@ -31,6 +32,9 @@ public class UsersController {
 
     @Autowired
     RelationshipRepository relationshipRepository;
+
+    @Autowired
+    private S3Service s3Service;
 
     // ---------------------------------------------------------------------
     // After login: ensure User exists, then go to posts
@@ -186,22 +190,24 @@ public class UsersController {
             String uploadDir = "uploads";
 
             try {
-                Files.createDirectories(Paths.get(uploadDir));
-
-                String originalFilename = StringUtils.cleanPath(imageFile.getOriginalFilename());
-                String extension = "";
-                int dotIndex = originalFilename.lastIndexOf('.');
-                if (dotIndex >= 0) {
-                    extension = originalFilename.substring(dotIndex); // includes the dot
-                }
-
-                String filename = UUID.randomUUID().toString() + extension;
-                Path destination = Paths.get(uploadDir).resolve(filename);
-
-                Files.copy(imageFile.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
-
-                // Store web path so Thymeleaf can render it
-                user.setImagePath("/uploads/" + filename);
+//                Files.createDirectories(Paths.get(uploadDir));
+//
+//                String originalFilename = StringUtils.cleanPath(imageFile.getOriginalFilename());
+//                String extension = "";
+//                int dotIndex = originalFilename.lastIndexOf('.');
+//                if (dotIndex >= 0) {
+//                    extension = originalFilename.substring(dotIndex); // includes the dot
+//                }
+//
+//                String filename = UUID.randomUUID().toString() + extension;
+//                Path destination = Paths.get(uploadDir).resolve(filename);
+//
+//                Files.copy(imageFile.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
+//
+//                // Store web path so Thymeleaf can render it
+//                user.setImagePath("/uploads/" + filename);
+                  String filename = s3Service.uploadImage(imageFile);
+                  user.setImagePath(filename);
             } catch (IOException e) {
                 throw new RuntimeException("Failed to store profile image", e);
             }
