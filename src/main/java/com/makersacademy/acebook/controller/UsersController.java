@@ -187,27 +187,11 @@ public class UsersController {
 
         // Handle optional new profile image upload
         if (imageFile != null && !imageFile.isEmpty()) {
-            String uploadDir = "uploads";
-
             try {
-//                Files.createDirectories(Paths.get(uploadDir));
-//
-//                String originalFilename = StringUtils.cleanPath(imageFile.getOriginalFilename());
-//                String extension = "";
-//                int dotIndex = originalFilename.lastIndexOf('.');
-//                if (dotIndex >= 0) {
-//                    extension = originalFilename.substring(dotIndex); // includes the dot
-//                }
-//
-//                String filename = UUID.randomUUID().toString() + extension;
-//                Path destination = Paths.get(uploadDir).resolve(filename);
-//
-//                Files.copy(imageFile.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
-//
-//                // Store web path so Thymeleaf can render it
-//                user.setImagePath("/uploads/" + filename);
-                  String filename = s3Service.uploadImage(imageFile);
-                  user.setImagePath(filename);
+                String originalProfileImage = user.getImagePath();
+                String filename = s3Service.uploadImage(imageFile);
+                user.setImagePath(filename);
+                s3Service.deleteImage(originalProfileImage);
             } catch (IOException e) {
                 throw new RuntimeException("Failed to store profile image", e);
             }
