@@ -1,35 +1,75 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      data-theme="light">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Comment</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.2/dist/full.min.css" rel="stylesheet" type="text/css" />
-    <!-- lucide icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col" data-theme="light">
+
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
 <th:block th:replace="fragments/layout :: navbar"></th:block>
-<main class="bg-gray-100 flex-grow flex justify-center items-start pt-8 pb-8">
-<h2>Edit Comment</h2>
 
-<form th:action="@{'/posts/' + ${postId} + '/comments/' + ${comment.id} + '/update'}"
-      method="post">
+<main class="flex-grow flex justify-center items-start pt-8 pb-8 px-4">
+    <div class="w-full max-w-lg">
 
-    <!-- Editable content field -->
-    <textarea name="content" rows="3" cols="50"
-              th:text="${comment.content}">
-    </textarea>
+        <div class="card w-full bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
 
-    <button type="submit">Save</button>
-</form>
+            <div class="h-2 bg-gradient-to-r from-blue-500 to-sky-400"></div>
 
-<!-- show last edited timestamp -->
-<p th:if="${comment.editedAt != null}">
-    Last edited on:
-    <span th:text="${#temporals.format(comment.editedAt, 'dd MMM yyyy HH:mm')}"></span>
-</p>
+            <div class="card-body p-6">
 
-<a th:href="@{'/posts/' + ${postId}}">Cancel</a>
+                <div class="mb-4">
+                    <h2 class="text-xl font-bold text-gray-900 flex items-center gap-2">
+                        <i data-lucide="message-square-dashed" class="w-5 h-5 text-blue-500"></i>
+                        Edit Comment
+                    </h2>
+                    <p class="text-sm text-gray-500 mt-1">Update your comment below.</p>
+                </div>
+
+                <form th:action="@{'/posts/' + ${postId} + '/comments/' + ${comment.id} + '/update'}"
+                      method="post"
+                      class="space-y-4">
+
+                    <div class="form-control">
+                        <label class="label hidden" for="content">
+                            <span class="label-text">Comment</span>
+                        </label>
+                        <textarea id="content"
+                                  name="content"
+                                  rows="4"
+                                  th:text="${comment.content}"
+                                  class="textarea textarea-bordered text-base focus:border-blue-500 w-full"
+                                  placeholder="Write a comment..."></textarea>
+                    </div>
+
+                    <div class="text-xs text-gray-400 text-right" th:if="${comment.editedAt != null}">
+                        Last edited: <span th:text="${#temporals.format(comment.editedAt, 'dd MMM yyyy HH:mm')}"></span>
+                    </div>
+
+                    <div class="flex justify-end gap-3 pt-2">
+                        <a th:href="@{'/posts/' + ${postId}}" class="btn btn-ghost">Cancel</a>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i data-lucide="save" class="w-4 h-4 mr-1"></i>
+                            Save Update
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
 </main>
+
+<script>
+    lucide.createIcons();
+</script>
+
 </body>
 </html>
