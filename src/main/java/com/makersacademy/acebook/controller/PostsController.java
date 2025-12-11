@@ -7,6 +7,7 @@ import com.makersacademy.acebook.repository.LikeRepository;
 import com.makersacademy.acebook.repository.CommentRepository;
 import com.makersacademy.acebook.repository.PostRepository;
 import com.makersacademy.acebook.repository.UserRepository;
+import com.makersacademy.acebook.services.S3Service;
 import jakarta.validation.constraints.Null;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -42,6 +43,9 @@ public class PostsController {
 
     @Autowired
     private CommentRepository commentRepository;
+
+    @Autowired
+    private S3Service s3Service;
 
     @GetMapping("/posts")
 //    public String index(@RequestParam(defaultValue="0") int page,Model model) {
@@ -118,27 +122,8 @@ public class PostsController {
             String uploadDir = "uploads"; // Folder relative to project root
 
             try {
-                // Ensures upload directory exists
-                Files.createDirectories(Paths.get(uploadDir));
-
-                String originalFilename = StringUtils.cleanPath(imageFile.getOriginalFilename());
-                String extension = "";
-
-                int dotIndex = originalFilename.lastIndexOf('.');
-                if(dotIndex >= 0) {
-                    extension = originalFilename.substring(dotIndex); // Includes the dot
-                }
-
-                // Generate a unique filename to avoid collisions
-                String filename = UUID.randomUUID().toString() + extension;
-                Path destination = Paths.get(uploadDir).resolve(filename);
-
-                // Save the file to disk
-                Files.copy(imageFile.getInputStream(), destination, StandardCopyOption.REPLACE_EXISTING);
-
-                // Store the web accessible path in the post
-                post.setImagePath("/uploads/" + filename);
-
+                String newPath = s3Service.uploadImage(imageFile);
+                post.setImagePath(newPath);
             } catch (IOException e) {
                 throw new RuntimeException("Failed to store uploaded file.", e);
             }
@@ -189,8 +174,12 @@ public class PostsController {
                 deleteFileFromUploads(post.getImagePath());
             }
             // Save new image
-            String newPath = saveImageToUploads(newImage);
-            post.setImagePath(newPath);
+            try {
+                String newPath = s3Service.uploadImage(newImage);
+                post.setImagePath(newPath);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to update image file.", e);
+            }
         }
         postRepository.save(post);
         return new RedirectView("/posts");
