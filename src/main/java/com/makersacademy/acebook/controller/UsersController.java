@@ -83,8 +83,13 @@ public class UsersController {
     // ---------------------------------------------------------------------
     @GetMapping("/users/{id}")
     public ModelAndView userProfile(@PathVariable("id") Long id) {
-        User user = userRepository.findById(id).orElseThrow(() ->
-                new IllegalArgumentException("Invalid User Id:" + id));
+        User user = userRepository.findById(id).orElse(null);
+
+        if (user == null) {
+            ModelAndView errorView = new ModelAndView("errors/usernotfound");
+            errorView.addObject("message", "The requested user does not exist.");
+            return errorView;
+        }
 
         DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
                 .getContext()
