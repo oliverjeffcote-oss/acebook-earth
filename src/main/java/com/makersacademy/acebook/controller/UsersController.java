@@ -1,5 +1,6 @@
 package com.makersacademy.acebook.controller;
 
+import com.makersacademy.acebook.model.Post;
 import com.makersacademy.acebook.model.Relationship;
 import com.makersacademy.acebook.model.User;
 import com.makersacademy.acebook.repository.RelationshipRepository;
@@ -23,6 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 @Controller
@@ -136,6 +138,8 @@ public class UsersController {
         long postCount = postRepository.countByUser(user);
 //      This will give a count for likes received on all posts owned by user
         long likesCount = likeRepository.countLikesReceivedByUser(user);
+        // show all posts created by the user in the user profile
+        List<Post> userPosts = postRepository.findByUserOrderByCreatedAtDesc(user);
 
 
         model.addAttribute("user", user);
@@ -143,6 +147,7 @@ public class UsersController {
         model.addAttribute("relationship", null);   // no friendship with yourself
         model.addAttribute("postCount", postCount);
         model.addAttribute("likesCount", likesCount);
+        model.addAttribute("userPosts", userPosts);
         return "users/userprofile";
     }
 

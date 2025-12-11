@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<th:block th:fragment="postCard(postItem)">
+    <div class="card w-full bg-white border border-gray-200 rounded-lg shadow-md mb-4">
+        <div class="card-body p-4">
+
+            <!-- User info -->
+            <div class="flex items-center mb-3">
+                <div class="avatar mr-3">
+                    <div class="w-10 h-10 rounded-full overflow-hidden">
+                        <img th:src="@{'https://ui-avatars.com/api/?name=' + ${postItem.user.username}}"/>
+                    </div>
+                </div>
+                <div>
+                    <a th:href="@{/users/{id}(id=${postItem.user.id})}"
+                       th:text="${postItem.user.username}"
+                       class="font-semibold text-gray-900 hover:underline"></a>
+
+                    <p class="text-xs text-gray-500"
+                       th:text="${#temporals.format(postItem.createdAt, 'dd MMM yyyy HH:mm')}"></p>
+
+                    <!-- this shows (edited) if edited -->
+                    <span th:if="${postItem.editedAt != null}"
+                          class="text-xs text-gray-400">(edited)</span>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <p class="text-gray-700 text-sm mb-3" th:text="${postItem.content}"></p>
+
+            <!-- Image -->
+            <div th:if="${postItem.imagePath != null}" class="mb-3">
+                <img th:src="${postItem.imagePath}" class="rounded-lg w-full object-cover max-h-96"/>
+            </div>
+
+            <!-- Actions -->
+            <div class="border-y py-2 mb-2 flex justify-between items-center">
+
+                <!-- this shows like/unlike -->
+                <div th:with="currentUser=${#authentication.principal.attributes['email']}">
+                    <form th:unless="${#lists.contains(postItem.likes.![user.email], currentUser)}"
+                          th:action="@{'/posts/' + ${postItem.id} + '/likes'}"
+                          method="post">
+                        <button class="btn btn-ghost btn-sm text-gray-500">Like</button>
+                    </form>
+
+                    <form th:if="${#lists.contains(postItem.likes.![user.email], currentUser)}"
+                          th:action="@{'/posts/' + ${postItem.id} + '/likes/unlike'}"
+                          method="post">
+                        <button class="btn btn-ghost btn-sm text-red-500">Unlike</button>
+                    </form>
+                </div>
+
+                <div class="text-xs text-gray-500 flex items-center space-x-3">
+                    <span th:text="${#lists.size(postItem.likes)} + ' likes'"></span>
+                    <a th:href="@{/posts/{id}(id=${postItem.id})}"
+                       th:text="${#lists.size(postItem.comment)} + ' comments'"></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</th:block>
+</html>

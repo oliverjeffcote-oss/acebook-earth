@@ -172,7 +172,25 @@
                 </div>
             </div>
         </div>
+        <!-- BEGIN: User Posts Section -->
+        <div class="mt-8">
+
+            <h2 class="text-xl font-bold text-gray-800 mb-4">
+                Posts by <span th:text="${user.username}"></span>
+            </h2>
+
+            <div th:if="${#lists.isEmpty(userPosts)}">
+                <p class="text-gray-500 text-sm italic">This user has not posted anything yet.</p>
+            </div>
+
+            <div th:each="postItem : ${userPosts}">
+                <th:block th:replace="fragments/user-profile-posts :: postCard(postItem=${postItem})"></th:block>
+            </div>
+
+        </div>
+        <!-- END: User Posts Section -->
     </div>
+
 </main>
 
 <script>
