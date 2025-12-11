@@ -21,7 +21,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.UUID;
+
+import com.makersacademy.acebook.enums.Status;
+import com.makersacademy.acebook.model.Relationship;
+import org.springframework.security.core.Authentication;
+
 
 @Controller
 public class UsersController {
@@ -53,16 +59,19 @@ public class UsersController {
     }
 
     // ---------------------------------------------------------------------
-    // Search bar functionality
-    // ---------------------------------------------------------------------
+// Search bar functionality
+// ---------------------------------------------------------------------
     @GetMapping("/users/search")
-    public String searchUsers(@RequestParam(name = "query", required = false) String query,
-                              Model model) {
+    public String searchUsers(
+            @RequestParam(name = "query", required = false) String query,
+            Model model
+    ) {
 
         // Handle empty / missing query gracefully
         if (query == null || query.trim().isEmpty()) {
             model.addAttribute("query", "");
             model.addAttribute("results", java.util.Collections.emptyList());
+            model.addAttribute("suggestedUsers", java.util.Collections.emptyList());
             return "users/searchresults";
         }
 
@@ -74,7 +83,112 @@ public class UsersController {
         model.addAttribute("query", trimmedQuery);
         model.addAttribute("results", results);
 
+        // ----- Suggested close matches (for typos / variations) -----
+        java.util.List<User> suggestedUsers = new java.util.ArrayList<>();
+
+        // Only bother with suggestions if we got no direct matches
+        if (results.isEmpty()) {
+            String lowerQuery = trimmedQuery.toLowerCase();
+
+            for (User candidate : userRepository.findAll()) {
+                if (candidate.getUsername() == null) continue;
+
+                String candidateName = candidate.getUsername().toLowerCase();
+
+                // Skip exact matches
+                if (candidateName.equals(lowerQuery)) continue;
+
+                int distance = levenshteinDistance(lowerQuery, candidateName);
+
+                // Very small distance => good suggestion
+                if (distance > 0 && distance <= 2) {
+                    suggestedUsers.add(candidate);
+                }
+            }
+        }
+
+        model.addAttribute("suggestedUsers", suggestedUsers);
+
+        // ----- Friendship info (only if authenticated) -----
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null
+                && authentication.isAuthenticated()
+                && authentication.getPrincipal() instanceof DefaultOidcUser principal) {
+
+            String auth0Username = principal.getAttribute("https://myapp.com/username");
+
+            User loggedInUser = userRepository.findUserByUsername(auth0Username)
+                    .orElseThrow(() -> new RuntimeException("Logged-in user not found: " + auth0Username));
+
+            // Map of userId -> status string
+            java.util.Map<Long, String> friendshipStatuses = new java.util.HashMap<>();
+
+            for (User u : results) {
+                // Mark yourself
+                if (u.getId().equals(loggedInUser.getId())) {
+                    friendshipStatuses.put(u.getId(), "SELF");
+                    continue;
+                }
+
+                // Check relationship in both directions
+                Relationship relationship = relationshipRepository
+                        .findByRequesterAndReceiver(loggedInUser, u)
+                        .orElseGet(() -> relationshipRepository
+                                .findByRequesterAndReceiver(u, loggedInUser)
+                                .orElse(null));
+
+                if (relationship == null) {
+                    friendshipStatuses.put(u.getId(), "NONE");
+                } else if (relationship.getStatus() == Status.ACCEPTED) {
+                    friendshipStatuses.put(u.getId(), "FRIENDS");
+                } else if (relationship.getStatus() == Status.PENDING) {
+                    // Distinguish who sent the request
+                    if (relationship.getRequester().getId().equals(loggedInUser.getId())) {
+                        friendshipStatuses.put(u.getId(), "OUTGOING_PENDING");
+                    } else {
+                        friendshipStatuses.put(u.getId(), "INCOMING_PENDING");
+                    }
+                } else {
+                    friendshipStatuses.put(u.getId(), "NONE");
+                }
+            }
+
+            model.addAttribute("friendshipStatuses", friendshipStatuses);
+            model.addAttribute("loggedInUser", loggedInUser);
+        }
+
         return "users/searchresults";
+    }
+
+    /**
+     * Simple Levenshtein distance implementation for fuzzy username matching.
+     */
+    private int levenshteinDistance(String a, String b) {
+        int[][] dp = new int[a.length() + 1][b.length() + 1];
+
+        for (int i = 0; i <= a.length(); i++) {
+            dp[i][0] = i;
+        }
+        for (int j = 0; j <= b.length(); j++) {
+            dp[0][j] = j;
+        }
+
+        for (int i = 1; i <= a.length(); i++) {
+            for (int j = 1; j <= b.length(); j++) {
+                int cost = (a.charAt(i - 1) == b.charAt(j - 1)) ? 0 : 1;
+
+                dp[i][j] = Math.min(
+                        Math.min(
+                                dp[i - 1][j] + 1,      // deletion
+                                dp[i][j - 1] + 1       // insertion
+                        ),
+                        dp[i - 1][j - 1] + cost      // substitution
+                );
+            }
+        }
+
+        return dp[a.length()][b.length()];
     }
 
 
