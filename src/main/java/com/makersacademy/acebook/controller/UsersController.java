@@ -4,6 +4,8 @@ import com.makersacademy.acebook.model.Relationship;
 import com.makersacademy.acebook.model.User;
 import com.makersacademy.acebook.repository.RelationshipRepository;
 import com.makersacademy.acebook.repository.UserRepository;
+import com.makersacademy.acebook.repository.PostRepository;
+import com.makersacademy.acebook.repository.LikeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
@@ -31,6 +33,12 @@ public class UsersController {
 
     @Autowired
     RelationshipRepository relationshipRepository;
+
+    @Autowired
+    private PostRepository postRepository;
+
+    @Autowired
+    private LikeRepository likeRepository;
 
     // ---------------------------------------------------------------------
     // After login: ensure User exists, then go to posts
@@ -124,10 +132,17 @@ public class UsersController {
         User user = userRepository
                 .findUserByUsername(auth0Username)
                 .orElseGet(() -> userRepository.save(new User(auth0Username, userEmail)));
+// This will give a count for posts
+        long postCount = postRepository.countByUser(user);
+//      This will give a count for likes received on all posts owned by user
+        long likesCount = likeRepository.countLikesReceivedByUser(user);
+
 
         model.addAttribute("user", user);
         model.addAttribute("loggedInUser", user);   // you are the logged-in user
         model.addAttribute("relationship", null);   // no friendship with yourself
+        model.addAttribute("postCount", postCount);
+        model.addAttribute("likesCount", likesCount);
         return "users/userprofile";
     }
 

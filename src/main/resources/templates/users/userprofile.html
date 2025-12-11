@@ -119,12 +119,12 @@
                 <div class="flex items-center space-x-5 mt-4 border-b pb-4">
                     <div class="flex items-center text-sm font-medium">
                         <i data-lucide="heart" class="w-4 h-4 mr-1.5 text-red-500 fill-red-500 shrink-0"></i>
-                        <span class="font-bold text-base text-gray-800 mr-1.5">0</span>
+                        <span class="font-bold text-base text-gray-800 mr-1.5" th:text="${likesCount}">0</span>
                         <span class="text-gray-500">Likes</span>
                     </div>
                     <div class="flex items-center text-sm font-medium">
                         <i data-lucide="send" class="w-4 h-4 mr-1.5 text-blue-500 shrink-0"></i>
-                        <span class="font-bold text-base text-gray-800 mr-1.5">0</span>
+                        <span class="font-bold text-base text-gray-800 mr-1.5" th:text="${postCount}">0</span>
                         <span class="text-gray-500">Posts</span>
                     </div>
                 </div>
