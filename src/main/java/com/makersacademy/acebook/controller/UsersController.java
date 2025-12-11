@@ -246,6 +246,9 @@ public class UsersController {
                 .getPrincipal();
 
         String auth0Username = principal.getAttribute("https://myapp.com/username");
+        long postCount = postRepository.countByUser(user);
+//      This will give a count for likes received on all posts owned by user
+        long likesCount = likeRepository.countLikesReceivedByUser(user);
 
         User loggedInUser = userRepository.findUserByUsername(auth0Username)
                 .orElseThrow(() -> new RuntimeException("Logged-in user not found: " + auth0Username));
@@ -259,6 +262,8 @@ public class UsersController {
         modelAndView.addObject("user", user);           // profile owner
         modelAndView.addObject("loggedInUser", loggedInUser);
         modelAndView.addObject("relationship", relationship);
+        modelAndView.addObject("postCount", postCount);
+        modelAndView.addObject("likesCount", likesCount);
         return modelAndView;
     }
 

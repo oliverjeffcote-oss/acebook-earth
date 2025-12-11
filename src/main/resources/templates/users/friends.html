@@ -1,29 +1,162 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity5"
+      data-theme="light">
 <head>
     <meta charset="UTF-8"/>
-    <title>Friends</title>
-    <link rel="stylesheet" href="/main.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${profileOwner != null} ? 'Friends of ' + ${profileOwner.username} : 'Friends'">
+        Friends
+    </title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/daisyui@4.10.2/dist/full.min.css" rel="stylesheet" type="text/css" />
-    <!-- lucide icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col" data-theme="light">
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+<!-- Navbar -->
 <th:block th:replace="fragments/layout :: navbar"></th:block>
-<main class="bg-gray-100 flex-grow flex justify-center items-start pt-8 pb-8">
 
-<h1>Friends</h1>
+<main class="flex-grow flex justify-center items-start pt-8 pb-8 px-4">
+    <div class="w-full max-w-2xl relative space-y-6">
 
-<!-- show message if no friends -->
-<div th:if="${friends.isEmpty()}">
-    <p>You have no friends yet.</p>
-</div>
+        <!-- Floating back button (same style as profile page) -->
+        <div class="absolute -left-16 top-5 hidden lg:block" th:if="${profileOwner != null}">
+            <a th:href="@{/users/{id}(id=${profileOwner.id})}"
+               class="btn btn-ghost btn-circle text-gray-500 hover:bg-gray-200"
+               title="Back to profile">
+                <i data-lucide="arrow-left" class="w-6 h-6"></i>
+            </a>
+        </div>
 
-<!-- show list of friend usernames -->
-<ul th:if="${!friends.isEmpty()}">
-    <li th:each="friend : ${friends}" th:text="${friend.username}"></li>
-</ul>
+        <!-- Header card -->
+        <div class="card bg-white border border-gray-200 rounded-xl shadow-lg">
+            <div class="card-body p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div>
+                    <h1 class="text-lg font-bold text-gray-800">
+                        Friends
+                        <span th:if="${profileOwner != null}">
+                            of <span th:text="${profileOwner.username}">username</span>
+                        </span>
+                    </h1>
+
+                    <p class="text-sm text-gray-500 mt-1"
+                       th:if="${friends != null}"
+                       th:text="${#lists.size(friends)} + ' friend(s)'">
+                        0 friend(s)
+                    </p>
+                </div>
+
+                <!-- Optional secondary back button for small screens -->
+                <a th:if="${profileOwner != null}"
+                   th:href="@{/users/{id}(id=${profileOwner.id})}"
+                   class="btn btn-ghost btn-sm rounded-full border border-gray-200 flex items-center gap-1 sm:hidden">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    <span>Back to profile</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- No friends state -->
+        <div th:if="${friends == null or friends.isEmpty()}"
+             class="card bg-white border border-gray-200 rounded-xl shadow-lg">
+            <div class="card-body p-6 text-center space-y-3 text-gray-600">
+
+                <p class="text-lg font-semibold"
+                   th:if="${profileOwner != null and user != null and profileOwner.id == user.id}">
+                    You have no friends yet.
+                </p>
+
+                <p class="text-lg font-semibold"
+                   th:if="${profileOwner == null or user == null or profileOwner.id != user.id}">
+                    This user has no friends yet.
+                </p>
+
+                <p class="text-sm"
+                   th:if="${profileOwner != null and user != null and profileOwner.id == user.id}">
+                    Visit other profiles and send friend requests to start building your friends list.
+                </p>
+            </div>
+        </div>
+
+        <!-- Friends list -->
+        <div th:if="${friends != null and !friends.isEmpty()}" class="space-y-3">
+
+            <div th:each="friend : ${friends}"
+                 class="card bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow">
+                <div class="card-body p-4 flex gap-4 items-center">
+
+                    <!-- Avatar -->
+                    <div class="flex-shrink-0">
+                        <div class="avatar">
+                            <div class="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold overflow-hidden">
+                                <img th:if="${friend.imagePath != null}"
+                                     th:src="${friend.imagePath}"
+                                     alt="Profile photo"
+                                     class="object-cover w-full h-full"/>
+                                <img th:if="${friend.imagePath == null}"
+                                     th:src="@{'https://ui-avatars.com/api/?name=' + ${friend.username} + '&background=random&color=fff'}"
+                                     alt="User Avatar"
+                                     class="object-cover w-full h-full"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main content -->
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center flex-wrap gap-2">
+                            <a th:href="@{/users/{id}(id=${friend.id})}"
+                               class="font-semibold text-gray-900 hover:underline truncate max-w-xs">
+                                <span th:text="${friend.username}">Friend name</span>
+                            </a>
+
+                            <span class="badge badge-success badge-outline text-xs">
+                                Friend
+                            </span>
+                        </div>
+
+                        <!-- About -->
+                        <p th:if="${friend.description != null && !#strings.isEmpty(friend.description)}"
+                           class="text-sm text-gray-700 mt-1">
+                            <span class="font-semibold">About: </span>
+                            <span th:text="${friend.description}">User bio</span>
+                        </p>
+
+                        <!-- Extra meta -->
+                        <p class="text-xs text-gray-500 mt-1 flex flex-wrap gap-x-2 gap-y-1">
+                            <span th:if="${friend.location != null && !#strings.isEmpty(friend.location)}">
+                                <span class="font-medium">Location:</span>
+                                <span th:text="${friend.location}">London</span>
+                            </span>
+
+                            <span th:if="${friend.education != null && !#strings.isEmpty(friend.education)}">
+                                ·
+                                <span class="font-medium">Education:</span>
+                                <span th:text="${friend.education}">Makers Academy</span>
+                            </span>
+                        </p>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex-shrink-0 flex flex-col items-end gap-2">
+                        <a th:href="@{/users/{id}(id=${friend.id})}"
+                           class="btn btn-ghost btn-xs rounded-full text-blue-600 hover:bg-blue-50">
+                            View profile
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
 </main>
+
+<script>
+    lucide.createIcons();
+</script>
 </body>
 </html>
