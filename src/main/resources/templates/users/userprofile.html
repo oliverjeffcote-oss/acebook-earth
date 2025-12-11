@@ -60,15 +60,15 @@
                         </h2>
 
                         <p class="text-sm text-gray-500 flex flex-wrap items-center mt-1">
-                                <span class="flex items-center mr-3">
-                                    <i data-lucide="mail" class="w-3.5 h-3.5 mr-1"></i>
-                                    <span th:text="${user?.username} + '@acebook.com'">email</span>
-                                </span>
+                            <span class="flex items-center mr-3">
+                                <i data-lucide="mail" class="w-3.5 h-3.5 mr-1"></i>
+                                <span th:text="${user?.username} + '@acebook.com'">email</span>
+                            </span>
 
                             <span class="flex items-center" th:if="${not #strings.isEmpty(user?.location)}">
-                                    <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1 ml-1"></i>
-                                    <span th:text="${user.location}">Location</span>
-                                </span>
+                                <i data-lucide="map-pin" class="w-3.5 h-3.5 mr-1 ml-1"></i>
+                                <span th:text="${user.location}">Location</span>
+                            </span>
                         </p>
                     </div>
 
@@ -115,24 +115,14 @@
 
                             <div th:if="${relationship != null}" th:switch="${relationship?.status?.name()}">
 
-                                    <span th:case="'PENDING'">
-                                        <div th:if="${relationship?.receiver?.id == loggedInUser?.id}" class="flex gap-2">
-                                            <form th:action="@{'/users/' + ${relationship.requester.id} + '/requests/accept'}" method="post">
-                                                <button type="submit" class="btn btn-success btn-sm text-white rounded-full">Accept</button>
-                                            </form>
-                                            <form th:action="@{'/users/' + ${relationship.requester.id} + '/requests/reject'}" method="post">
-                                                <button type="submit" class="btn btn-error btn-sm text-white rounded-full">Reject</button>
-                                            </form>
-                                        </div>
-
-                                        <div th:if="${relationship?.requester?.id == loggedInUser?.id}">
-                                            <button class="btn btn-disabled btn-sm rounded-full">Request Pending</button>
-                                        </div>
-                                    </span>
-
-                                <span th:case="'ACCEPTED'">
-                                        <form th:action="@{'/users/' + ${user.id} + '/remove'}" method="post">
-                                            <button type="submit" class="btn btn-error btn-sm text-white rounded-full">Remove Friend</button>
+                                <!-- Pending friendship -->
+                                <span th:case="'PENDING'">
+                                    <div th:if="${relationship?.receiver?.id == loggedInUser?.id}" class="flex gap-2">
+                                        <form th:action="@{'/users/' + ${relationship.requester.id} + '/requests/accept'}" method="post">
+                                            <button type="submit" class="btn btn-success btn-sm text-white rounded-full">Accept</button>
+                                        </form>
+                                        <form th:action="@{'/users/' + ${relationship.requester.id} + '/requests/reject'}" method="post">
+                                            <button type="submit" class="btn btn-error btn-sm text-white rounded-full">Reject</button>
                                         </form>
                                     </div>
 
@@ -141,6 +131,7 @@
                                     </div>
                                 </span>
 
+                                <!-- Accepted friendship -->
                                 <span th:case="'ACCEPTED'">
                                     <form th:action="@{'/users/' + ${user.id} + '/remove'}" method="post">
                                         <button type="submit" class="btn btn-error btn-sm text-white rounded-full">Remove Friend</button>
