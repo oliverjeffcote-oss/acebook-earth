@@ -32,12 +32,12 @@
                                  class="object-cover w-full h-full"/>
 
                             <img th:if="${post.user?.imagePath == null and #authentication?.principal?.attributes != null and #authentication.principal.attributes['picture'] != null}"
-                                 th:src="${#authentication.principal.attributes['picture']}"
+                                 th:src="'https://placehold.co/40x40/4c6ef5/ffffff?text=' + ${post.user?.username != null ? #strings.substring(post.user.username,0,1) : 'U'}"
                                  class="object-cover w-full h-full"/>
 
                             <img th:if="${post.user?.imagePath == null and (#authentication?.principal?.attributes == null or #authentication.principal.attributes['picture'] == null)}"
-                                 th:src="'https://placehold.co/40x40/4c6ef5/ffffff?text=' + ${post.user?.username != null ? #strings.substring(user.username,0,1) : 'U'}"
-                                 alt="My Avatar" />
+                                 th:src="'https://placehold.co/40x40/4c6ef5/ffffff?text=' + ${post.user?.username != null ? #strings.substring(post.user.username,0,1) : 'U'}"
+                                 alt="User Avatar" />
 
 <!--                            <img th:src="@{'https://ui-avatars.com/api/?name=' + ${post.user.username} + '&background=random&color=fff'}"-->
 <!--                                  alt="User Avatar 1" />-->
