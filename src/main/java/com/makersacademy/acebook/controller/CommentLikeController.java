@@ -37,9 +37,9 @@ public class CommentLikeController {
                 .getAuthentication()
                 .getPrincipal();
 
-        String email = (String) principal.getAttributes().get("https://myapp.com/username");
+        String username = (String) principal.getAttributes().get("https://myapp.com/username");
 
-        User user = userRepository.findUserByUsername(email)
+        User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
 

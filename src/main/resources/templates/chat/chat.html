@@ -14,35 +14,7 @@
 </head>
 <body class="bg-gray-100 h-screen flex flex-col" data-theme="light">
 
-<div sec:authorize="isAuthenticated()" class="navbar-sticky bg-white shadow-lg border-b border-gray-200 z-50 relative flex-none">
-    <div class="navbar w-full max-w-7xl mx-auto px-4">
-        <div class="navbar-start">
-            <a href="/posts" class="btn btn-ghost text-2xl font-extrabold text-blue-600 mr-4">AceBook</a>
-        </div>
-
-        <div class="navbar-center flex flex-grow justify-center lg:flex-none">
-            <a href="/posts" class="btn btn-ghost btn-sm">Feed</a>
-            <a href="/chat" class="btn btn-primary btn-sm rounded-full">Chat</a>
-        </div>
-
-        <div class="navbar-end space-x-2">
-            <span class="hidden md:inline-block text-sm text-gray-500 mr-2">
-                 Hi, <span th:text="${myUsername}">User</span>
-            </span>
-
-            <div class="dropdown dropdown-end">
-                <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
-                    <div class="w-10 rounded-full ring ring-gray-300">
-                        <img th:src="@{'https://ui-avatars.com/api/?name=' + ${myUsername} + '&background=random&color=fff'}" alt="User Avatar" />
-                    </div>
-                </div>
-                <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-                    <li><a href="/logout">Logout</a></li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
+<th:block th:replace="fragments/layout :: navbar"></th:block>
 
 <main class="flex-grow overflow-hidden pt-6 pb-6 px-4">
     <div class="max-w-7xl mx-auto h-full flex gap-6">
@@ -55,7 +27,7 @@
                 <ul class="menu w-full p-2">
                     <li th:each="user : ${users}" th:if="${user.username != myUsername}">
                         <a th:href="@{/chat(username=${user.username})}"
-                           th:classappend="${user.username == selectedRecipient} ? 'active bg-blue-50 text-blue-600' : ''"
+                           th:classappend="${user.username == selectedRecipient} ? 'active bg-blue-50 text-blue-500' : ''"
                            class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50">
 
                             <div class="avatar placeholder">
@@ -141,130 +113,122 @@
 </main>
 
 <script th:inline="javascript">
-    var stompClient = null;
-    var currentUser = document.getElementById('currentUsername').value;
-    var currentRecipient = document.getElementById('currentRecipient').value;
-    var messageArea = document.getElementById('messageArea');
+    // Cache DOM elements to avoid repeated lookups
+    const messageArea = document.getElementById('messageArea');
+    const usernameInput = document.getElementById('currentUsername');
+    const recipientInput = document.getElementById('currentRecipient');
+    const messageInput = document.getElementById('messageInput');
+    let stompClient = null;
 
-function connect() {
-        var socket = new SockJS('/ws');
+    function connect() {
+        const socket = new SockJS('/ws');
         stompClient = Stomp.over(socket);
 
-        // OPTIONAL: Keep this enabled while debugging!
-        // It will show you in the browser console if the message arrives.
-        stompClient.debug = function(str) {
-            console.log(str);
-        };
+        // Disable debug logs in console
+        stompClient.debug = () => {};
 
         stompClient.connect({}, function (frame) {
-            console.log('Connected: ' + frame);
-
             stompClient.subscribe('/user/queue/messages', function (messageOutput) {
-                var msg = JSON.parse(messageOutput.body);
+                const msg = JSON.parse(messageOutput.body);
                 handleIncomingMessage(msg);
             });
         }, function(error) {
-            console.error("WebSocket error:", error);
+            // Error handling logic (silent or UI notification)
         });
     }
 
- function handleIncomingMessage(msg) {
-  console.log("Raw Message Received:", msg);
+    function handleIncomingMessage(msg) {
+        // 1. Get current UI state
+        const currentUser = (usernameInput.value || "").toLowerCase();
+        const activePartner = (recipientInput.value || "").toLowerCase();
 
-    // 2. SAFE EXTRACTION: Handle potential nulls and case sensitivity
-    // The DTO sends 'senderName', but previous code used 'sender.username'
-    // We try both to be safe.
-    var rawSender = msg.senderName || (msg.sender ? msg.sender.username : "") || "";
-    var rawRecipient = msg.recipientName || (msg.recipient ? msg.recipient.username : "") || "";
+        // 2. Extract message data (Aligned with Java OutgoingChatMessageDTO)
+        const sender = (msg.senderName || "").toLowerCase();
+        const recipient = (msg.recipientName || "").toLowerCase();
 
-    var senderLower = rawSender.toLowerCase();
-    var recipientLower = rawRecipient.toLowerCase();
+        // 3. Filter Logic
+        // Condition A: Message is FROM the person I'm chatting with
+        const isIncoming = sender === activePartner;
+        // Condition B: Message is FROM ME (Echo) sent TO the person I'm chatting with
+        const isOutgoing = sender === currentUser && recipient === activePartner;
 
-    // 3. GET CURRENT PAGE STATE (Force lowercase)
-    var currentUserInput = document.getElementById('currentUsername').value;
-    var currentRecipientInput = document.getElementById('currentRecipient').value;
-
-    var meLower = (currentUserInput || "").toLowerCase();
-    var chatPartnerLower = (currentRecipientInput || "").toLowerCase();
-
-    console.log(`Logic Check: Sender[${senderLower}] vs Partner[${chatPartnerLower}] OR (Sender[${senderLower}]==Me[${meLower}] & Recip[${recipientLower}]==Partner[${chatPartnerLower}])`);
-
-    // 4. THE FILTER LOGIC
-    // Condition A: The message is FROM the person I am currently looking at.
-    var isIncomingFromCurrentChat = (senderLower === chatPartnerLower);
-
-    // Condition B: I sent the message (Echo) TO the person I am currently looking at.
-    var isMyEchoToCurrentChat = (senderLower === meLower && recipientLower === chatPartnerLower);
-
-    if (isIncomingFromCurrentChat || isMyEchoToCurrentChat) {
-        console.log("✅ Rendering message bubble");
-        renderMessageBubble(msg, rawSender); // Pass raw name for display (looks nicer)
-        scrollToBottom();
-    } else {
-        console.log("🚫 Message ignored. It belongs to a different conversation.");
-        // Optional: Add a UI notification badge here for other chats
+        if (isIncoming || isOutgoing) {
+            renderMessageBubble(msg);
+            scrollToBottom();
+        }
     }
+
+   function renderMessageBubble(msg) {
+    const currentUser = (usernameInput.value || "").toLowerCase();
+    const sender = (msg.senderName || "").toLowerCase();
+    const isMe = (sender === currentUser);
+
+    const chatDiv = document.createElement('div');
+    chatDiv.className = isMe ? 'chat chat-end' : 'chat chat-start';
+
+    const headerDiv = document.createElement('div');
+    headerDiv.className = 'chat-header text-xs opacity-50 mb-1';
+    headerDiv.innerText = isMe ? 'You' : msg.senderName;
+
+    const bubbleDiv = document.createElement('div');
+    bubbleDiv.className = isMe
+        ? 'chat-bubble chat-bubble-primary'
+        : 'chat-bubble chat-bubble-secondary bg-gray-200 text-gray-800';
+    bubbleDiv.innerText = msg.content;
+
+    const footerDiv = document.createElement('div');
+    footerDiv.className = 'chat-footer opacity-50 text-[10px] mt-1';
+
+    // Timestamp locale time converter
+    footerDiv.innerText = formatLocalTime(msg.timestamp);
+
+    chatDiv.appendChild(headerDiv);
+    chatDiv.appendChild(bubbleDiv);
+    chatDiv.appendChild(footerDiv);
+
+    messageArea.appendChild(chatDiv);
 }
 
-    function renderMessageBubble(msg, senderName) {
-        var currentUserInput = document.getElementById('currentUsername').value;
-        var meLower = (currentUserInput || "").toLowerCase();
-        var senderLower = (senderName || "").toLowerCase();
-
-        // Compare lowercase to lowercase
-        var isMe = (senderLower === meLower);
-
-        var chatDiv = document.createElement('div');
-        chatDiv.className = isMe ? 'chat chat-end' : 'chat chat-start';
-
-        var headerDiv = document.createElement('div');
-        headerDiv.className = 'chat-header text-xs opacity-50 mb-1';
-        headerDiv.innerText = isMe ? 'You' : senderName; // Display the name nicely
-
-        var bubbleDiv = document.createElement('div');
-        bubbleDiv.className = isMe ? 'chat-bubble chat-bubble-primary' : 'chat-bubble chat-bubble-secondary bg-gray-200 text-gray-800';
-        bubbleDiv.innerText = msg.content;
-
-        var footerDiv = document.createElement('div');
-        footerDiv.className = 'chat-footer opacity-50 text-[10px] mt-1';
-        // If msg.timestamp is a string like "12:00", use it. Otherwise say "Just now"
-        footerDiv.innerText = msg.timestamp ? msg.timestamp.substring(11, 16) : 'Just now';
-
-        chatDiv.appendChild(headerDiv);
-        chatDiv.appendChild(bubbleDiv);
-        chatDiv.appendChild(footerDiv);
-
-        messageArea.appendChild(chatDiv);
-    }
-
     function sendMessage(event) {
-        event.preventDefault(); // STOP PAGE REFRESH
+        event.preventDefault();
 
-        var contentInput = document.getElementById('messageInput');
-        var content = contentInput.value.trim();
+        const content = messageInput.value.trim();
+        const recipient = recipientInput.value;
 
-        if (content && currentRecipient && stompClient) {
-            // Match the DTO in Java: record ChatMessageDTO(String content, String recipientUsername)
-            var payload = {
+        if (content && recipient && stompClient) {
+            const payload = {
                 content: content,
-                recipientUsername: currentRecipient
+                recipientUsername: recipient
             };
 
             stompClient.send("/app/private-message", {}, JSON.stringify(payload));
-            contentInput.value = '';
+            messageInput.value = '';
         }
     }
 
     function scrollToBottom() {
-       if(messageArea) {
-          messageArea.scrollTop = messageArea.scrollHeight;
-       }
+        if (messageArea) {
+            messageArea.scrollTop = messageArea.scrollHeight;
+        }
     }
 
-    // Initialize
-    lucide.createIcons();
-    connect();
-    scrollToBottom();
+    function formatLocalTime(timestampStr) {
+    if (!timestampStr) return 'Just now';
+
+    // Create a Date object from the ISO string
+    const date = new Date(timestampStr);
+
+    // Check if the date is valid (in case of parsing errors)
+    if (isNaN(date.getTime())) return 'Just now';
+
+    // Format using the user's browser locale
+    // short = 1:30 PM (or 13:30 based on system settings)
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
+        // Initialize
+        lucide.createIcons();
+        connect();
+        scrollToBottom();
 </script>
 
 </body>

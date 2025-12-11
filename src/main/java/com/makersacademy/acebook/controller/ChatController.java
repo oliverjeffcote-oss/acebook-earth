@@ -1,10 +1,13 @@
 package com.makersacademy.acebook.controller;
 
 import com.makersacademy.acebook.model.ChatMessage;
+import com.makersacademy.acebook.model.Relationship;
 import com.makersacademy.acebook.model.User;
 import com.makersacademy.acebook.repository.ChatMessageRepository;
+import com.makersacademy.acebook.repository.RelationshipRepository;
 import com.makersacademy.acebook.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -18,78 +21,47 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
 public class ChatController {
 
-    private final SimpMessagingTemplate messagingTemplate;
-    private final ChatMessageRepository chatMessageRepository;
-    private final UserRepository userRepository;
+    private final  SimpMessagingTemplate messagingTemplate;
+    @Autowired
+    ChatMessageRepository chatMessageRepository;
 
-    private final SimpUserRegistry userRegistry;
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    RelationshipRepository relationshipRepository;
 
     // DTOs
     record ChatMessageDTO(String content, String recipientUsername) {} // For Private
-    record PublicMessageDTO(String content) {} // NEW: For Public (no recipient needed)
-
-    // Output DTO
     record OutgoingChatMessageDTO(String content, String senderName, String recipientName, String timestamp) {}
 
     // ===========================
-    // 1. GLOBAL / PUBLIC CHAT
-    // ===========================
-
-    @GetMapping("/global")
-    public String getGlobalChat(Model model, Principal principal) {
-        String currentUsername = getRealUsername(principal);
-        model.addAttribute("myUsername", currentUsername);
-
-        // Fetch messages where recipient is null
-        List<ChatMessage> globalHistory = chatMessageRepository.findByRecipientIsNullOrderByTimestampAsc();
-        model.addAttribute("history", globalHistory);
-
-        // Pass users if you want a "Who's Online" list (optional)
-        model.addAttribute("users", userRepository.findAll());
-
-        return "global-chat"; // Points to global-chat.html
-    }
-
-    @MessageMapping("/public-message")
-    public void processPublicMessage(@Payload PublicMessageDTO messageDto, Principal principal) {
-        String senderUsername = getRealUsername(principal);
-        User sender = userRepository.findUserByUsername(senderUsername)
-                .orElseThrow(() -> new RuntimeException("Sender not found"));
-
-        // Save with NULL recipient
-        ChatMessage chatMessage = ChatMessage.builder()
-                .sender(sender)
-                .recipient(null)
-                .content(messageDto.content())
-                .build();
-
-        ChatMessage saved = chatMessageRepository.save(chatMessage);
-
-        OutgoingChatMessageDTO outgoingDto = new OutgoingChatMessageDTO(
-                saved.getContent(),
-                saved.getSender().getUsername(),
-                "Global",
-                saved.getTimestamp().toString()
-        );
-
-        // Broadcast to everyone subscribed to /topic/public
-        messagingTemplate.convertAndSend("/topic/public", outgoingDto);
-    }
-
-    // ===========================
-    // 2. PRIVATE 1-ON-1 CHAT
+    //    PRIVATE 1-ON-1 CHAT
     // ===========================
 
     @GetMapping("/chat")
     public String getPrivateChatPage(@RequestParam(required = false) String username, Model model, Principal principal) {
         String currentUsername = getRealUsername(principal);
+
         model.addAttribute("myUsername", currentUsername);
-        model.addAttribute("users", userRepository.findAll());
+
+        User currentUserObj = userRepository.findUserByUsername(currentUsername).orElseThrow();
+
+
+        List<Relationship> friendships = relationshipRepository.findAllFriends(currentUserObj.getId(), com.makersacademy.acebook.enums.Status.ACCEPTED);
+        // Filter: If I am the Requester, return the Receiver. If I am the Receiver, return the Requester.
+
+        List<User> availableContacts = friendships.stream()
+                .map(rel -> rel.getRequester().getId().equals(currentUserObj.getId()) ? rel.getReceiver() : rel.getRequester())
+                .toList();
+
+        model.addAttribute("users", availableContacts);
 
         if (username != null) {
             User sender = userRepository.findUserByUsername(currentUsername).orElseThrow();
@@ -98,7 +70,7 @@ public class ChatController {
             model.addAttribute("selectedRecipient", username);
             model.addAttribute("history", chatMessageRepository.findConversation(sender, recipient));
         }
-        return "chat"; // Points to chat.html (your existing file)
+        return "chat/chat"; // Points to chat.html (your existing file)
     }
 
     @MessageMapping("/private-message")
@@ -114,21 +86,6 @@ public class ChatController {
                 .build();
 
         ChatMessage saved = chatMessageRepository.save(chatMessage);
-
-        System.out.println("--------------------------------------------------");
-        System.out.println("🔍 WEBSOCKET DIAGNOSTICS");
-        System.out.println("Targeting Recipient (from DB): [" + recipient.getUsername() + "]");
-
-        System.out.println("Who is actually connected right now?");
-        userRegistry.getUsers().forEach(user -> {
-            System.out.println(" - Connected User: [" + user.getName() + "]");
-        });
-
-        // Check if the specific user is found
-        boolean isRecipientOnline = userRegistry.getUser(recipient.getUsername()) != null;
-        System.out.println("Is Recipient Online according to Registry? " + isRecipientOnline);
-        System.out.println("--------------------------------------------------");
-        // --- DEBUGGING BLOCK END ---
 
         OutgoingChatMessageDTO outgoingDto = new OutgoingChatMessageDTO(
                 saved.getContent(),

@@ -42,17 +42,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             Principal principal = request.getPrincipal();
 
             if (principal instanceof OAuth2AuthenticationToken token) {
-                // EXTRACT THE EXACT SAME ATTRIBUTE AS YOUR POSTS CONTROLLER
                 String username = (String) token.getPrincipal().getAttributes().get("https://myapp.com/username");
-
-                // Fallback if the custom attribute is missing
                 if (username == null) {
                     username = token.getName();
                 }
 
                 final String finalUsername = username;
 
-                // Return a simple Principal object wrapping the username
                 return new Principal() {
                     @Override
                     public String getName() {
