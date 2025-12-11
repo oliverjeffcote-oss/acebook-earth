@@ -60,6 +60,7 @@ public class ChatController {
         List<User> availableContacts = friendships.stream()
                 .map(rel -> rel.getRequester().getId().equals(currentUserObj.getId()) ? rel.getReceiver() : rel.getRequester())
                 .toList();
+        model.addAttribute("user", currentUserObj);
 
         model.addAttribute("users", availableContacts);
 
