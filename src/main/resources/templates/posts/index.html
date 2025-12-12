@@ -75,7 +75,7 @@
                             </div>
 
                             <p id="file-error" class="text-red-500 text-xs p-0 pl-2 m-0 hidden">
-                                Max file size is 1MB.
+                                Max file size is 10MB.
                             </p>
                         </div>
                     </div>
@@ -282,7 +282,7 @@
     lucide.createIcons();
 
     function validateFileSize(input) {
-        const maxBytes = 1024 * 1024; // 1MB
+        const maxBytes = 10 * 1024 * 1024; // 1MB
         const errorMsg = document.getElementById("file-error");
         const postBtn = document.getElementById("PostButton");
 
