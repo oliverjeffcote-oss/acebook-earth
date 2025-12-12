@@ -70,20 +70,23 @@ public class PostsController {
 
     @PostMapping("/posts")
     public RedirectView create(@ModelAttribute Post post,
-                                @RequestParam(value = "image", required = false)
-                                MultipartFile imageFile) {
+                               @RequestParam(value = "image", required = false) MultipartFile imageFile) {
 
-//        DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
-//                .getContext()
-//                .getAuthentication()
-//                .getPrincipal();
-//        String username = (String) principal.getAttributes().get("https://myapp.com/username");
-//        User user = userRepository.findUserByUsername(username)
-//                .orElseThrow(() -> new RuntimeException("User not found"));
-//
-//        post.setUser(user);
+        // 1️⃣ Get the currently logged-in user
+        DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
 
-        // Optional image upload handling
+        String username = (String) principal.getAttributes().get("https://myapp.com/username");
+
+        User currentUser = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+
+        // 2️⃣ Set the user on the post
+        post.setUser(currentUser);
+
+        // 3️⃣ Handle optional image upload
         if (imageFile != null && !imageFile.isEmpty()) {
             try {
                 String newPath = s3Service.uploadImage(imageFile);
@@ -93,7 +96,9 @@ public class PostsController {
             }
         }
 
+        // 4️⃣ Save the post
         postRepository.save(post);
+
         return new RedirectView("/posts");
     }
 
