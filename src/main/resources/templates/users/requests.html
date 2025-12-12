@@ -55,13 +55,13 @@
                 <form th:action="@{'/users/' + ${requester.id} + '/requests/accept'}"
                       method="post"
                       class="inline">
-                    <button type="submit" class="btn btn-sm btn-success rounded-full">Accept</button>
+                    <button type="submit" class="btn btn-sm btn-success text-white rounded-full">Accept</button>
                 </form>
 
                 <form th:action="@{'/users/' + ${requester.id} + '/requests/reject'}"
                       method="post"
                       class="inline">
-                    <button type="submit" class="btn btn-sm btn-error rounded-full">Reject</button>
+                    <button type="submit" class="btn btn-sm btn-error text-white rounded-full">Reject</button>
                 </form>
             </div>
         </div>
