@@ -112,7 +112,10 @@ public class PostsController {
         User currentUser = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
+        // Add to model
         model.addAttribute("user", currentUser);
+        model.addAttribute("currentUser", currentUser);
+        model.addAttribute("auth0Picture", principal.getAttributes().get("picture")); // <-- add this
 
         return "posts/showpost";
     }
