@@ -7,6 +7,7 @@ import com.makersacademy.acebook.repository.LikeRepository;
 import com.makersacademy.acebook.repository.PostRepository;
 import com.makersacademy.acebook.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.stereotype.Controller;
@@ -29,6 +30,9 @@ public class LikeController {
     @Autowired
     private UserRepository userRepository;
 
+    @Value("${app.domain}")
+    private String domain;
+
     @PostMapping("/posts/{postId}/likes")
     public RedirectView likePost(@PathVariable Long postId, HttpServletRequest request) {
 //        if (principal == null) {
@@ -43,7 +47,7 @@ public class LikeController {
             return new RedirectView("/login");
         }
 
-        String email = (String) principal.getAttributes().get("https://myapp.com/username");
+        String email = (String) principal.getAttributes().get(domain + "username");
         User user = userRepository.findUserByUsername(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -98,7 +102,7 @@ public class LikeController {
             return new RedirectView("/login");
         }
 
-        String username = (String) principal.getAttributes().get("https://myapp.com/username");
+        String username = (String) principal.getAttributes().get(domain + "username");
         User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 

@@ -1,5 +1,6 @@
 package com.makersacademy.acebook.controller;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
 import com.makersacademy.acebook.model.User;
 import com.makersacademy.acebook.repository.CommentRepository;
@@ -32,6 +33,9 @@ public class CommentController {
         @Autowired
         UserRepository userRepository;
 
+        @Value("${app.domain}")
+        private String domain;
+
         @PostMapping("/posts/{id}/comment")
         public RedirectView createComment(
                 @PathVariable("id") Long postId,
@@ -41,7 +45,7 @@ public class CommentController {
                     .getContext()
                     .getAuthentication()
                     .getPrincipal();
-            String username = (String) principal.getAttributes().get("https://myapp.com/username");
+            String username = (String) principal.getAttributes().get(domain + "username");
             User user = userRepository.findUserByUsername(username)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -73,7 +77,7 @@ public class CommentController {
                     .getAuthentication()
                     .getPrincipal();
 
-            String username = (String) principal.getAttributes().get("https://myapp.com/username");
+            String username = (String) principal.getAttributes().get(domain + "username");
             User currentUser = userRepository.findUserByUsername(username)
                     .orElseThrow(() -> new RuntimeException("User not found: " + username));
 

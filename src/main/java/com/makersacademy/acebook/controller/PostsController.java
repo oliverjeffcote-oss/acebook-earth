@@ -10,6 +10,7 @@ import com.makersacademy.acebook.repository.UserRepository;
 import com.makersacademy.acebook.services.S3Service;
 import jakarta.validation.constraints.Null;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -42,6 +43,9 @@ public class PostsController {
     @Autowired
     private S3Service s3Service;
 
+    @Value("${app.domain}")
+    private String domain;
+
     @GetMapping("/posts")
 
     public String index(@RequestParam(defaultValue = "0") int page, Model model) {
@@ -50,7 +54,7 @@ public class PostsController {
                 .getAuthentication()
                 .getPrincipal();
 
-        String username = (String) principal.getAttributes().get("https://myapp.com/username");
+        String username = (String) principal.getAttributes().get(domain + "username");
 
         User currentUser = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
@@ -75,7 +79,7 @@ public class PostsController {
                 .getContext()
                 .getAuthentication()
                 .getPrincipal();
-        String username = (String) principal.getAttributes().get("https://myapp.com/username");
+        String username = (String) principal.getAttributes().get(domain + "username");
         User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -108,7 +112,7 @@ public class PostsController {
                 .getAuthentication()
                 .getPrincipal();
 
-        String username = (String) principal.getAttributes().get("https://myapp.com/username");
+        String username = (String) principal.getAttributes().get(domain + "username");
         User currentUser = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
@@ -128,7 +132,7 @@ public class PostsController {
                 .getAuthentication()
                 .getPrincipal();
 
-        String username = (String) principal.getAttributes().get("https://myapp.com/username");
+        String username = (String) principal.getAttributes().get(domain + "username");
         User currentUser = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
 

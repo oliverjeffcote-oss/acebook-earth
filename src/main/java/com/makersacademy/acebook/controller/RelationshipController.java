@@ -8,6 +8,7 @@ import com.makersacademy.acebook.repository.RelationshipRepository;
 import com.makersacademy.acebook.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.stereotype.Controller;
@@ -30,11 +31,14 @@ public class RelationshipController {
     @Autowired
     private UserRepository userRepository;
 
+    @Value("${app.domain}")
+    private String domain;
+
     @GetMapping("/users/requests/pending") // Note the simplified URL
     public ModelAndView userRequests(@AuthenticationPrincipal DefaultOidcUser principal) {
 
         // 1. Get the username from the principal's attributes
-        String auth0Username = principal.getAttribute("https://myapp.com/username");
+        String auth0Username = principal.getAttribute(domain + "username");
 
         // 2. Load the User entity from the database using the username
         // The current user is guaranteed to be logged in, so orElseThrow() is safe.
@@ -64,7 +68,7 @@ public class RelationshipController {
                 .getAuthentication()
                 .getPrincipal();
 
-        String auth0Username = principal.getAttribute("https://myapp.com/username");
+        String auth0Username = principal.getAttribute(domain + "username");
 
         User user = userRepository.findUserByUsername(auth0Username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -98,7 +102,7 @@ public class RelationshipController {
                 .getAuthentication()
                 .getPrincipal();
 
-        String auth0Username = principal.getAttribute("https://myapp.com/username");
+        String auth0Username = principal.getAttribute(domain + "username");
 
         User requester = userRepository.findUserByUsername(auth0Username)
                 .orElseThrow(() -> new RuntimeException("Requester user not found"));
@@ -127,7 +131,7 @@ public class RelationshipController {
                 .getAuthentication()
                 .getPrincipal();
 
-        String auth0Username = principal.getAttribute("https://myapp.com/username");
+        String auth0Username = principal.getAttribute(domain + "username");
 
         User receiver = userRepository.findUserByUsername(auth0Username)
                 .orElseThrow(() -> new RuntimeException("Receiver user not found"));
@@ -154,7 +158,7 @@ public class RelationshipController {
                 .getAuthentication()
                 .getPrincipal();
 
-        String auth0Username = principal.getAttribute("https://myapp.com/username");
+        String auth0Username = principal.getAttribute(domain + "username");
 
         User receiver = userRepository.findUserByUsername(auth0Username)
                 .orElseThrow(() -> new RuntimeException("Receiver user not found"));
@@ -175,7 +179,7 @@ public class RelationshipController {
     @PostMapping("/users/{id}/remove")
     public RedirectView removeFriend(@PathVariable("id") Long profileUserId, @AuthenticationPrincipal DefaultOidcUser principal) {
 
-        String auth0Username = principal.getAttribute("https://myapp.com/username");
+        String auth0Username = principal.getAttribute(domain + "username");
 
         User user = userRepository.findUserByUsername(auth0Username)
                 .orElseThrow();

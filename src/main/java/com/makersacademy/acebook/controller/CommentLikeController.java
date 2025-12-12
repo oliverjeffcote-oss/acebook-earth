@@ -7,6 +7,7 @@ import com.makersacademy.acebook.repository.CommentLikeRepository;
 import com.makersacademy.acebook.repository.CommentRepository;
 import com.makersacademy.acebook.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.stereotype.Controller;
@@ -28,6 +29,9 @@ public class CommentLikeController {
     @Autowired
     private UserRepository userRepository;
 
+    @Value("${app.domain}")
+    private String domain;
+
     // like a comment
     @PostMapping("/comments/{commentId}/like")
     public RedirectView likeComment(@PathVariable Long commentId) {
@@ -37,7 +41,7 @@ public class CommentLikeController {
                 .getAuthentication()
                 .getPrincipal();
 
-        String username = (String) principal.getAttributes().get("https://myapp.com/username");
+        String username = (String) principal.getAttributes().get(domain + "username");
 
         User user = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -69,7 +73,7 @@ public class CommentLikeController {
                 .getAuthentication()
                 .getPrincipal();
 
-        String email = (String) principal.getAttributes().get("https://myapp.com/username");
+        String email = (String) principal.getAttributes().get(domain + "username");
 
         User user = userRepository.findUserByUsername(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));

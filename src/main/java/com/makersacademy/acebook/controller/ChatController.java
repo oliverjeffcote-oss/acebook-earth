@@ -8,6 +8,7 @@ import com.makersacademy.acebook.repository.RelationshipRepository;
 import com.makersacademy.acebook.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -36,6 +37,9 @@ public class ChatController {
 
     @Autowired
     RelationshipRepository relationshipRepository;
+
+    @Value("${app.domain}")
+    private String domain;
 
     // DTOs
     record ChatMessageDTO(String content, String recipientUsername) {} // For Private
@@ -104,7 +108,7 @@ public class ChatController {
     // Helper
     private String getRealUsername(Principal principal) {
         if (principal instanceof Authentication auth && auth.getPrincipal() instanceof DefaultOidcUser oidcUser) {
-            String customName = (String) oidcUser.getAttributes().get("https://myapp.com/username");
+            String customName = (String) oidcUser.getAttributes().get(domain + "username");
             if (customName != null && !customName.isEmpty()) return customName;
         }
         return principal.getName();

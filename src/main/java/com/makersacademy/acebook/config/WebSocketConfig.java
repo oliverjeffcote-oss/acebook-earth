@@ -1,5 +1,6 @@
 package com.makersacademy.acebook.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
@@ -37,12 +38,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      * Inner class to align WebSocket Identity with Database Username
      */
     private static class CustomHandshakeHandler extends DefaultHandshakeHandler {
+        @Value("${app.domain}")
+        private String domain;
         @Override
         protected Principal determineUser(ServerHttpRequest request, WebSocketHandler wsHandler, Map<String, Object> attributes) {
             Principal principal = request.getPrincipal();
 
             if (principal instanceof OAuth2AuthenticationToken token) {
-                String username = (String) token.getPrincipal().getAttributes().get("https://myapp.com/username");
+                String username = (String) token.getPrincipal().getAttributes().get(domain + "username");
                 if (username == null) {
                     username = token.getName();
                 }

@@ -9,6 +9,7 @@ import com.makersacademy.acebook.services.S3Service;
 import com.makersacademy.acebook.repository.PostRepository;
 import com.makersacademy.acebook.repository.LikeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.stereotype.Controller;
@@ -52,6 +53,9 @@ public class UsersController {
     @Autowired
     private LikeRepository likeRepository;
 
+    @Value("${app.domain}")
+    private String domain;
+
     // ---------------------------------------------------------------------
     // After login: ensure User exists, then go to posts
     // ---------------------------------------------------------------------
@@ -62,7 +66,7 @@ public class UsersController {
                 .getAuthentication()
                 .getPrincipal();
 
-        String auth0Username = principal.getAttribute("https://myapp.com/username");
+        String auth0Username = principal.getAttribute(domain + "username");
         String userEmail = principal.getEmail();
 
         userRepository
@@ -92,7 +96,7 @@ public class UsersController {
                     .getAuthentication()
                     .getPrincipal();
 
-            String username = (String) principal.getAttributes().get("https://myapp.com/username");
+            String username = (String) principal.getAttributes().get(domain + "username");
             User currentUser = userRepository.findUserByUsername(username)
                     .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
@@ -142,7 +146,7 @@ public class UsersController {
                 && authentication.isAuthenticated()
                 && authentication.getPrincipal() instanceof DefaultOidcUser principal) {
 
-            String auth0Username = principal.getAttribute("https://myapp.com/username");
+            String auth0Username = principal.getAttribute(domain + "username");
 
             User loggedInUser = userRepository.findUserByUsername(auth0Username)
                     .orElseThrow(() -> new RuntimeException("Logged-in user not found: " + auth0Username));
@@ -189,7 +193,7 @@ public class UsersController {
                 .getAuthentication()
                 .getPrincipal();
 
-        String username = (String) principal.getAttributes().get("https://myapp.com/username");
+        String username = (String) principal.getAttributes().get(domain + "username");
         User currentUser = userRepository.findUserByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
@@ -247,7 +251,7 @@ public class UsersController {
                 .getAuthentication()
                 .getPrincipal();
 
-        String auth0Username = principal.getAttribute("https://myapp.com/username");
+        String auth0Username = principal.getAttribute(domain + "username");
         long postCount = postRepository.countByUser(user);
 //      This will give a count for likes received on all posts owned by user
         long likesCount = likeRepository.countLikesReceivedByUser(user);
@@ -279,7 +283,7 @@ public class UsersController {
                 .getAuthentication()
                 .getPrincipal();
 
-        String auth0Username = principal.getAttribute("https://myapp.com/username");
+        String auth0Username = principal.getAttribute(domain + "username");
         String userEmail = principal.getEmail();
 
         User user = userRepository
@@ -312,7 +316,7 @@ public class UsersController {
                 .getAuthentication()
                 .getPrincipal();
 
-        String auth0Username = principal.getAttribute("https://myapp.com/username");
+        String auth0Username = principal.getAttribute(domain + "username");
         String userEmail = principal.getEmail();
 
         User user = userRepository
@@ -336,7 +340,7 @@ public class UsersController {
                 .getAuthentication()
                 .getPrincipal();
 
-        String auth0Username = principal.getAttribute("https://myapp.com/username");
+        String auth0Username = principal.getAttribute(domain + "username");
         String userEmail = principal.getEmail();
 
         // Always load the real user from the DB, don't trust IDs from the form
