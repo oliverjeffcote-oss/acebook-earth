@@ -358,7 +358,9 @@ public class UsersController {
                 String originalProfileImage = user.getImagePath();
                 String filename = s3Service.uploadImage(imageFile);
                 user.setImagePath(filename);
-                s3Service.deleteImage(originalProfileImage);
+                if(originalProfileImage != null) {
+                    s3Service.deleteImage(originalProfileImage);
+                }
             } catch (IOException e) {
                 throw new RuntimeException("Failed to store profile image", e);
             }
