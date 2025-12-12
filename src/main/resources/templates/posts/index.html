@@ -98,22 +98,35 @@
 
                     <div class="flex items-center">
                         <div class="avatar mr-3">
-                            <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
-                                <img th:if="${postItem.user?.imagePath != null}"
-                                     th:src="${postItem.user.imagePath}"
-                                     class="object-cover w-full h-full"/>
+                            <div class="relative w-10 h-10 rounded-full bg-blue-500 overflow-hidden">
 
-                                <img th:if="${postItem.user?.imagePath == null and #authentication?.principal?.attributes != null and #authentication.principal.attributes['picture'] != null}"
-                                     th:src="'https://placehold.co/40x40/4c6ef5/ffffff?text=' + ${postItem.user?.username != null ? #strings.substring(postItem.user.username,0,1) : 'U'}"
-                                     class="object-cover w-full h-full"/>
+                                <th:block th:with="
+            isCurrentUserPost=${postItem.user.id == user.id},
+            initials=${postItem.user.username != null ? #strings.toUpperCase(#strings.substring(postItem.user.username,0,2)) : 'U'},
+            avatarUrl=${postItem.user.imagePath != null ? postItem.user.imagePath :
+                (isCurrentUserPost and #authentication.principal.attributes['picture'] != null
+                    ? #authentication.principal.attributes['picture']
+                    : null)}
+        ">
 
-                                <img th:if="${postItem.user?.imagePath == null and (#authentication?.principal?.attributes == null or #authentication.principal.attributes['picture'] == null)}"
-                                     th:src="'https://placehold.co/40x40/4c6ef5/ffffff?text=' + ${postItem.user?.username != null ? #strings.substring(postItem.user.username,0,1) : 'U'}"
-                                     alt="User Avatar" />
-<!--                                <img th:src="@{'https://ui-avatars.com/api/?name=' + ${postItem.user.username} + '&background=random&color=fff'}"-->
-<!--                                     alt="User Avatar" class="object-cover w-full h-full"/>-->
+                                    <!-- Image avatar -->
+                                    <img th:if="${avatarUrl != null}"
+                                         th:src="${avatarUrl}"
+                                         alt="User Avatar"
+                                         class="absolute inset-0 w-full h-full object-cover"/>
+
+                                    <!-- Initials avatar -->
+                                    <span th:if="${avatarUrl == null}"
+                                          th:text="${initials}"
+                                          class="absolute inset-0 flex items-center justify-center
+                         text-white text-lg select-none">
+            </span>
+
+                                </th:block>
+
                             </div>
                         </div>
+
                         <div>
                             <a th:href="@{/users/{id}(id=${postItem.user.id})}"
                                class="font-semibold text-gray-900 hover:underline"

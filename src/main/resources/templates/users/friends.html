@@ -91,16 +91,24 @@
                     <!-- Avatar -->
                     <div class="flex-shrink-0">
                         <div class="avatar">
-                            <div class="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold overflow-hidden">
+                            <div class="w-12 h-12 rounded-full bg-blue-500 text-white
+            flex items-center justify-center overflow-hidden">
+
+                                <!-- REAL USER PHOTO -->
                                 <img th:if="${friend.imagePath != null}"
                                      th:src="${friend.imagePath}"
                                      alt="Profile photo"
-                                     class="object-cover w-full h-full"/>
-                                <img th:if="${friend.imagePath == null}"
-                                     th:src="@{'https://ui-avatars.com/api/?name=' + ${friend.username} + '&background=random&color=fff'}"
-                                     alt="User Avatar"
-                                     class="object-cover w-full h-full"/>
+                                     class="object-cover w-full h-full rounded-full"/>
+
+                                <!-- INITIALS PLACEHOLDER (centered perfectly) -->
+                                <span th:if="${friend.imagePath == null}"
+                                      th:text="${#strings.toUpperCase(#strings.substring(friend.username,0,2))}"
+                                      class="text-lg font-normal flex items-center justify-center w-full h-full">
+    </span>
+
                             </div>
+
+
                         </div>
                     </div>
 

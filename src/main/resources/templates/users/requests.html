@@ -13,7 +13,6 @@
 
 <th:block th:replace="fragments/layout :: navbar"></th:block>
 
-
 <main class="bg-gray-100 flex-grow flex justify-center items-start pt-8 pb-8">
     <div class="w-full max-w-xl space-y-4">
 
@@ -27,7 +26,28 @@
              class="card w-full bg-white border border-gray-200 rounded-lg shadow-md p-4 flex flex-row items-center justify-between">
 
             <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold text-sm">OL</div>
+
+                <!-- Avatar -->
+                <div class="w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center font-normal text-sm overflow-hidden">
+
+                    <!-- Real user photo -->
+                    <img th:if="${requester.imagePath != null}"
+                         th:src="${requester.imagePath}"
+                         alt="Profile photo"
+                         class="object-cover w-full h-full rounded-full"/>
+
+                    <!-- Fallback initials -->
+                    <span th:if="${requester.imagePath == null}"
+                          th:text="${#strings.toUpperCase(
+                    #strings.substring(
+                        requester.username,
+                        0,
+                        requester.username.length() > 2 ? 2 : requester.username.length()
+                    )
+                )}">
+</span>
+                </div>
+
                 <p th:text="${requester.username}" class="font-semibold text-gray-900"></p>
             </div>
 
