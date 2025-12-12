@@ -47,7 +47,7 @@ public class RelationshipController {
         List<Relationship> pendingRequests = relationshipRepository.findPendingRequests(user, Status.PENDING);
         List<User> requesters = pendingRequests.stream().map(Relationship::getRequester).toList();
 
-        ModelAndView modelAndView = new ModelAndView("/users/requests");
+        ModelAndView modelAndView = new ModelAndView("users/requests");
 
         // Add data to the model
         modelAndView.addObject("requesters", requesters);
@@ -81,7 +81,7 @@ public class RelationshipController {
                     }
                 }).toList();
 
-        ModelAndView modelAndView = new ModelAndView("/users/friends");
+        ModelAndView modelAndView = new ModelAndView("users/friends");
 
         modelAndView.addObject("friends", friends); // add the friend user accounts to page
         modelAndView.addObject("user", user); // add currently logged-in user
