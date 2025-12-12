@@ -42,6 +42,8 @@ public class PostsController {
     @Autowired
     private S3Service s3Service;
 
+
+
     @GetMapping("/posts")
 
     public String index(@RequestParam(defaultValue = "0") int page, Model model) {
