@@ -179,32 +179,39 @@
                                 <span th:if="${singleComment.editedAt != null}">(edited)</span>
                             </p>
 
-                            <!-- COMMENT LIKE / UNLIKE -->
-                            <div class="flex items-center gap-3 mt-1">
 
+                            <div class="flex items-center gap-2 mt-1">
+
+                                <!-- Heart (not liked) -->
+                                <form th:unless="${#lists.contains(singleComment.likes.![user.email], #authentication.principal.attributes['email'])}"
                                 <!-- Like -->
                                 <form th:unless="${#lists.contains(singleComment.likes.![user.email], loggedInUser.email)}"
                                       th:action="@{'/comments/' + ${singleComment.id} + '/like'}"
                                       method="post">
                                     <button type="submit"
-                                            class="text-xs text-blue-600 hover:underline">
-                                        Like
+                                            class="text-gray-400 hover:text-red-500 transition">
+                                        <i data-lucide="heart" class="w-4 h-4 mt-1"></i>
                                     </button>
                                 </form>
 
+                                <!-- Heart (liked) -->
+                                <form th:if="${#lists.contains(singleComment.likes.![user.email], #authentication.principal.attributes['email'])}"
                                 <!-- Unlike -->
                                 <form th:if="${#lists.contains(singleComment.likes.![user.email], loggedInUser.email)}"
                                       th:action="@{'/comments/' + ${singleComment.id} + '/unlike'}"
                                       method="post">
                                     <button type="submit"
-                                            class="text-xs text-red-600 hover:underline">
-                                        Unlike
+                                            class="text-red-500 hover:text-red-600 transition">
+                                        <i data-lucide="heart" class="w-4 h-4 fill-current mt-1"></i>
                                     </button>
                                 </form>
 
+                                <!-- Like count -->
                                 <span class="text-xs text-gray-500">
-                                    <span th:text="${#lists.size(singleComment.likes)}"></span> like(s)
+                                    <span th:text="${#lists.size(singleComment.likes)}"></span>
                                 </span>
+                            <div th:if="${singleComment.user.email == #authentication.principal.attributes['email']}"
+                                 class="flex items-center ml-3">
                             </div>
 
                             <!-- EDIT / DELETE COMMENT -->
@@ -226,6 +233,11 @@
                                 </form>
 
                             </div>
+                            </div>
+
+
+
+
                         </div>
                     </div>
                 </div>
