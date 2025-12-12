@@ -32,22 +32,23 @@
 
                 <div class="flex items-center mb-3">
                     <div class="avatar mr-3">
-                        <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white">
-                            <!-- Use S3 uploaded image if available -->
-                            <img th:if="${post.user.imagePath != null}" th:src="${post.user.imagePath}" class="object-cover w-full h-full"/>
-
-                            <!-- Use Auth0 picture only if this is the logged-in user's post -->
-                            <img th:if="${post.user.imagePath == null and post.user.id == currentUser.id and auth0Picture != null}"
-                                 th:src="${auth0Picture}"
+                        <div class="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-bold">
+                            <!-- avatar -->
+                            <img th:if="${post.user?.imagePath != null}"
+                                 th:src="${post.user.imagePath}"
                                  class="object-cover w-full h-full"/>
 
-                            <!-- Fallback to initials -->
-                            <div th:if="${post.user.imagePath == null and (post.user.id != currentUser.id or auth0Picture == null)}"
-                                 class="w-full h-full flex items-center justify-center bg-blue-500 text-white rounded-full text-lg"
-                                 th:text="${post.user.username != null ? #strings.toUpperCase(#strings.substring(post.user.username,0,2)) : 'U'}">
-                            </div>
-                        </div>
+                            <img th:if="${post.user?.imagePath == null and #authentication?.principal?.attributes != null and #authentication.principal.attributes['picture'] != null}"
+                                 th:src="'https://placehold.co/40x40/4c6ef5/ffffff?text=' + (${post.user?.username != null ? #strings.toUpperCase(#strings.substring(post.user.username,0,2)) : 'U'})"
+                                 class="object-cover w-full h-full"/>
 
+                            <img th:if="${post.user?.imagePath == null and (#authentication?.principal?.attributes == null or #authentication.principal.attributes['picture'] == null)}"
+                                 th:src="'https://placehold.co/40x40/4c6ef5/ffffff?text=' + (${post.user?.username != null ? #strings.toUpperCase(#strings.substring(post.user.username,0,2)) : 'U'})"
+                                 alt="User Avatar" />
+
+<!--                            <img th:src="@{'https://ui-avatars.com/api/?name=' + ${post.user.username} + '&background=random&color=fff'}"-->
+<!--                                  alt="User Avatar 1" />-->
+                        </div>
                     </div>
                     <div>
                         <a th:href="@{/users/{id}(id=${post.user.id})}"
@@ -121,14 +122,19 @@
                 <div th:each="singleComment : ${post.comment}" class="space-y-3">
                     <div class="flex items-start gap-2">
                         <div class="avatar shrink-0">
-                            <div class="w-7 h-7 rounded-full bg-blue-500">
+                            <div class="w-7 h-7 rounded-full bg-yellow-400">
 
-                                <img th:if="${singleComment.user.imagePath != null}" th:src="${singleComment.user.imagePath}" class="object-cover w-full h-full"/>
-                                <img th:if="${singleComment.user.imagePath == null and singleComment.user.id == currentUser.id and auth0Picture != null}" th:src="${auth0Picture}" class="object-cover w-full h-full"/>
-                                <div th:if="${singleComment.user.imagePath == null and (singleComment.user.id != currentUser.id or auth0Picture == null)}"
-                                     class="w-full h-full flex items-center justify-center bg-blue-500 text-white rounded-full text-xs"
-                                     th:text="${singleComment.user.username != null ? #strings.toUpperCase(#strings.substring(singleComment.user.username,0,2)) : 'U'}">
-                                </div>
+                                <img th:if="${singleComment.user?.imagePath != null}"
+                                     th:src="${singleComment.user.imagePath}"
+                                     class="object-cover w-full h-full"/>
+
+                                <img th:if="${singleComment.user?.imagePath == null and #authentication?.principal?.attributes != null and #authentication.principal.attributes['picture'] != null}"
+                                     th:src="'https://placehold.co/40x40/4c6ef5/ffffff?text=' + (${singleComment.user?.username != null ? #strings.toUpperCase(#strings.substring(singleComment.user.username,0,2)) : 'U'})"
+                                     class="object-cover w-full h-full"/>
+
+                                <img th:if="${singleComment.user?.imagePath == null and (#authentication?.principal?.attributes == null or #authentication.principal.attributes['picture'] == null)}"
+                                     th:src="'https://placehold.co/40x40/4c6ef5/ffffff?text=' + (${singleComment.user?.username != null ? #strings.toUpperCase(#strings.substring(singleComment.user.username,0,2)) : 'U'})"
+                                     alt="Commenter Avatar" />
                             </div>
                         </div>
                         <div class="bg-gray-100 p-2 rounded-xl text-sm max-w-[85%]">
