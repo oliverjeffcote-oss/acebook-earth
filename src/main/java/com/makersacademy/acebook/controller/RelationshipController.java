@@ -19,7 +19,6 @@ import org.springframework.web.servlet.view.RedirectView;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -84,7 +83,7 @@ public class RelationshipController {
 
         ModelAndView modelAndView = new ModelAndView("/users/friends");
 
-        modelAndView.addObject("friends", friends != null ? friends : new ArrayList<>());  ; // add the friend user accounts to page
+        modelAndView.addObject("friends", friends); // add the friend user accounts to page
         modelAndView.addObject("user", user); // add currently logged-in user
         modelAndView.addObject("profileOwner", profileOwner); // whose friends we're viewing
 
