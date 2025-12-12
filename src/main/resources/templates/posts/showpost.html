@@ -137,11 +137,11 @@
                                      alt="Commenter Avatar" />
                             </div>
                         </div>
-                        <div class="bg-gray-100 p-2 rounded-xl text-sm max-w-[85%]">
-                            <a th:href="@{/users/{id}(id=${singleComment.user.id})}" th:text="${singleComment.user.username}" class="font-semibold text-gray-900 hover:underline"></a>
-                            <p th:text="${singleComment.content}" class="text-gray-700"></p>
+                        <div class="bg-gray-100 p-2 pt-1.5 rounded-xl text-sm min-w-[93%]">
+                            <a th:href="@{/users/{id}(id=${singleComment.user.id})}" th:text="${singleComment.user.username}" class="font-semibold text-gray-900 hover:underline text-[13px]"></a>
+                            <p th:text="${singleComment.content}" class="text-gray-700 text-[15px]/4"></p>
 
-                            <p class="text-xs text-gray-500 mt-1">
+                            <p class="text-xs text-gray-500 mt-1.5">
                                 <span th:text="${#temporals.format(singleComment.createdAt, 'dd MMM yyyy HH:mm')}"></span>
                                 <span th:if="${singleComment.editedAt != null}">(edited)</span>
                             </p>
