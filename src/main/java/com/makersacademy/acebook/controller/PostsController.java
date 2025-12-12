@@ -73,15 +73,15 @@ public class PostsController {
                                 @RequestParam(value = "image", required = false)
                                 MultipartFile imageFile) {
 
-        DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getPrincipal();
-        String username = (String) principal.getAttributes().get("https://myapp.com/username");
-        User user = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        post.setUser(user);
+//        DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
+//                .getContext()
+//                .getAuthentication()
+//                .getPrincipal();
+//        String username = (String) principal.getAttributes().get("https://myapp.com/username");
+//        User user = userRepository.findUserByUsername(username)
+//                .orElseThrow(() -> new RuntimeException("User not found"));
+//
+//        post.setUser(user);
 
         // Optional image upload handling
         if (imageFile != null && !imageFile.isEmpty()) {
@@ -105,16 +105,16 @@ public class PostsController {
         model.addAttribute("post", post);
         model.addAttribute("comments", comments);
 
-        DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getPrincipal();
-
-        String username = (String) principal.getAttributes().get("https://myapp.com/username");
-        User currentUser = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
-
-        model.addAttribute("user", currentUser);
+//        DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
+//                .getContext()
+//                .getAuthentication()
+//                .getPrincipal();
+//
+//        String username = (String) principal.getAttributes().get("https://myapp.com/username");
+//        User currentUser = userRepository.findUserByUsername(username)
+//                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+//
+//        model.addAttribute("user", currentUser);
 
         return "posts/showpost";
     }
@@ -125,16 +125,16 @@ public class PostsController {
                 .orElseThrow(() -> new RuntimeException("Post not found"));
         model.addAttribute("post", post);
 
-        DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getPrincipal();
-
-        String username = (String) principal.getAttributes().get("https://myapp.com/username");
-        User currentUser = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found: " + username));
-
-        model.addAttribute("user", currentUser);
+//        DefaultOidcUser principal = (DefaultOidcUser) SecurityContextHolder
+//                .getContext()
+//                .getAuthentication()
+//                .getPrincipal();
+//
+//        String username = (String) principal.getAttributes().get("https://myapp.com/username");
+//        User currentUser = userRepository.findUserByUsername(username)
+//                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+//
+//        model.addAttribute("user", currentUser);
 
         return "posts/edit";
     }

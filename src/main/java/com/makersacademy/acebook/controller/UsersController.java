@@ -259,6 +259,7 @@ public class UsersController {
                 .orElseGet(() -> relationshipRepository
                         .findByRequesterAndReceiver(user, loggedInUser)
                         .orElse(null));
+        List<Post> userPosts = postRepository.findByUserOrderByCreatedAtDesc(user);
 
         ModelAndView modelAndView = new ModelAndView("users/userprofile");
         modelAndView.addObject("user", user);           // profile owner
@@ -266,6 +267,8 @@ public class UsersController {
         modelAndView.addObject("relationship", relationship);
         modelAndView.addObject("postCount", postCount);
         modelAndView.addObject("likesCount", likesCount);
+        modelAndView.addObject("userPosts", userPosts);
+
         return modelAndView;
     }
 

@@ -39,7 +39,7 @@
 
                 <!-- Friends + Chat icons for LARGE screens (left side) -->
                 <div class="hidden lg:flex gap-4 ml-2">
-                    <a th:href="@{'/users/' + ${user.id} + '/friends'}"
+                    <a th:href="@{'/users/' + ${loggedInUser.id} + '/friends'}"
                        class="btn btn-ghost btn-circle hover:bg-blue-50"
                        aria-label="Friends">
                         <i data-lucide="users" class="w-5 h-5" aria-hidden="true"></i>
@@ -55,7 +55,7 @@
 
             <!-- CENTRE: Friends + Chat icons for SMALL/MEDIUM screens -->
             <div class="navbar-center flex flex-grow justify-center lg:flex-none gap-4 lg:hidden">
-                <a th:href="@{'/users/' + ${user.id} + '/friends'}"
+                <a th:href="@{'/users/' + ${loggedInUser.id} + '/friends'}"
                    class="btn btn-ghost btn-circle hover:bg-blue-50"
                    aria-label="Friends">
                     <i data-lucide="users" class="w-5 h-5" aria-hidden="true"></i>
@@ -111,7 +111,7 @@
                             </a>
                         </li>
                         <li>
-                            <a th:href="@{'/users/' + ${user.id} + '/friends'}">
+                            <a th:href="@{'/users/' + ${loggedInUser.id} + '/friends'}">
                                 <i data-lucide="users" class="w-4 h-4 mr-2" aria-hidden="true"></i>
                                 Friends
                             </a>
@@ -178,7 +178,7 @@
                     <i data-lucide="home" class="w-4 h-4 mr-2" aria-hidden="true"></i>
                     Home
                 </a>
-                <a th:href="@{'/users/' + ${user.id} + '/friends'}" class="btn btn-ghost justify-start">
+                <a th:href="@{'/users/' + ${loggedInUser.id} + '/friends'}" class="btn btn-ghost justify-start">
                     <i data-lucide="users" class="w-4 h-4 mr-2" aria-hidden="true"></i>
                     Friends
                 </a>
