@@ -164,17 +164,20 @@
                             </div>
 
                         </div>
+                        <div class="bg-gray-100 p-2 pt-1.5 rounded-xl text-sm min-w-[93%]">
+                            <a th:href="@{/users/{id}(id=${singleComment.user.id})}" th:text="${singleComment.user.username}" class="font-semibold text-gray-900 hover:underline text-[13px]"></a>
+                            <p th:text="${singleComment.content}" class="text-gray-700 text-[15px]/4"></p>
 
-                        <div class="bg-gray-100 p-2 rounded-xl text-sm max-w-[85%]">
+<!--                        <div class="bg-gray-100 p-2 rounded-xl text-sm max-w-[85%]">-->
 
-                            <a th:href="@{/users/{id}(id=${singleComment.user.id})}"
-                               th:text="${singleComment.user.username}"
-                               class="font-semibold text-gray-900 hover:underline"></a>
+<!--                            <a th:href="@{/users/{id}(id=${singleComment.user.id})}"-->
+<!--                               th:text="${singleComment.user.username}"-->
+<!--                               class="font-semibold text-gray-900 hover:underline"></a>-->
 
-                            <p th:text="${singleComment.content}"
-                               class="text-gray-700"></p>
+<!--                            <p th:text="${singleComment.content}"-->
+<!--                               class="text-gray-700"></p>-->
 
-                            <p class="text-xs text-gray-500 mt-1">
+                            <p class="text-xs text-gray-500 mt-1.5">
                                 <span th:text="${#temporals.format(singleComment.createdAt, 'dd MMM yyyy HH:mm')}"></span>
                                 <span th:if="${singleComment.editedAt != null}">(edited)</span>
                             </p>
@@ -184,8 +187,7 @@
 
                                 <!-- Heart (not liked) -->
                                 <form th:unless="${#lists.contains(singleComment.likes.![user.email], #authentication.principal.attributes['email'])}"
-                                <!-- Like -->
-                                <form th:unless="${#lists.contains(singleComment.likes.![user.email], loggedInUser.email)}"
+
                                       th:action="@{'/comments/' + ${singleComment.id} + '/like'}"
                                       method="post">
                                     <button type="submit"
@@ -196,8 +198,6 @@
 
                                 <!-- Heart (liked) -->
                                 <form th:if="${#lists.contains(singleComment.likes.![user.email], #authentication.principal.attributes['email'])}"
-                                <!-- Unlike -->
-                                <form th:if="${#lists.contains(singleComment.likes.![user.email], loggedInUser.email)}"
                                       th:action="@{'/comments/' + ${singleComment.id} + '/unlike'}"
                                       method="post">
                                     <button type="submit"
@@ -221,6 +221,7 @@
                                 <a th:href="@{'/posts/' + ${post.id} + '/comments/' + ${singleComment.id} + '/edit'}"
                                    class="btn btn-ghost btn-xs text-gray-500 hover:text-blue-500 hover:bg-blue-50 gap-1">
                                     <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+                                    <span class="hidden sm:inline"></span>
                                 </a>
 
                                 <form th:action="@{'/posts/' + ${post.id} + '/comments/' + ${singleComment.id} + '/delete'}"
@@ -229,6 +230,7 @@
                                             class="btn btn-ghost btn-xs text-gray-500 hover:text-red-600 hover:bg-red-50 gap-1"
                                             onclick="return confirm('Are you sure?');">
                                         <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                                        <span class="hidden sm:inline"></span>
                                     </button>
                                 </form>
 
